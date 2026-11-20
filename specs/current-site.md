@@ -28,7 +28,7 @@ future owner-approved feature specs may intentionally change it.
 
 ## Verification
 
-Run the existing application/export suite, build and serve `public/`, inspect
-affected pages and interactions at desktop/mobile sizes, then verify the exact
-successful Actions commit against the live domain after deployment. See
+Use the application/export checks and production build in CI. Verify the exact
+successful Actions commit against the live domain, inspect affected pages and
+interactions, and check desktop/mobile behaviour when layout is affected. See
 `docs/operations.md` for details and limits of HTTP-only checks.

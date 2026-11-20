@@ -4,10 +4,10 @@ Last reviewed: 2026-11-20.
 
 ## Normal edit-to-live workflow
 
-1. Fetch/pull the current branch and inspect local changes. Work from this
-   repository rather than an old ZIP or machine-specific backup.
-2. Implement the requested change and run relevant checks. For a site edit,
-   export and inspect the static result locally, including affected links.
+1. Fetch/pull the current branch and inspect uncommitted changes. Work from this
+   repository and current deployed behaviour as the baseline.
+2. Implement the requested change and run relevant checks. Inspect the affected
+   pages and links; CI builds the deployable static output.
 3. If the owner requested deployment, commit and push to `main` according to
    repository policy. Otherwise use a feature branch for review.
 4. Open https://github.com/akmishranitd-tvk/tailvic/actions and follow the run
@@ -32,7 +32,7 @@ requires it. A failed run or unavailable browser must be reported accurately.
 - Node.js 24 for deployment tooling; Vercel CLI pinned to 66.2.0.
 - `uv` is installed on the runner because Vercel's Python build invokes it.
 - Build/output configuration in `vercel.json`, framework `null`, output `public`.
-- The workflow validates and exports locally, runs `vercel pull`,
+- The workflow validates and exports on the GitHub runner, runs `vercel pull`,
   `vercel build --prod`, then `vercel deploy --prebuilt --prod --yes`.
 - Vercel's configured build command also runs the checks before export.
 
@@ -63,7 +63,7 @@ deployment evidence. Confirm the Actions run corresponds to the intended SHA.
 GitHub repository Actions secrets are `VERCEL_TOKEN`, `VERCEL_ORG_ID`, and
 `VERCEL_PROJECT_ID`. Secret values are never committed or included in handover
 prompts. Existing repository access and these secrets are sufficient for the
-workflow; colleagues do not need the previous developer's local CLI sign-in.
+workflow; colleagues do not need the previous developer's CLI sign-in.
 
 The owner confirmed a Tailvic-project-scoped token with a 90-day expiry, saved
 on 2026-11-20. Its exact expiry/scope must be checked in Vercel rather than
@@ -74,7 +74,7 @@ revoke the superseded token. Do not broaden scope without owner authorization.
 
 Anyone who can alter trusted repository workflows can potentially use the
 deployment credential. Keep workflow changes reviewable and do not expose
-secrets to pull-request code. Local `.vercel/` and sign-in tokens stay ignored.
+secrets to pull-request code. Machine-specific sign-in files stay ignored.
 
 ## Domains
 
@@ -98,7 +98,7 @@ fully verified based only on an IP-pinned HTTP request; verify normal access too
 | `spawn uv ENOENT` | Preserve the workflow's `uv` installation before Vercel build |
 | Wrong project or forbidden access | Verify encrypted project/workspace IDs and token scope |
 | Build passes but old page remains | Confirm deployment SHA, production alias and normal DNS/cache behaviour |
-| Page works in Flask but not live | Reproduce using the static export and inspect exporter overrides |
+| Source feature is absent on the web | Check static-export overrides and the unfinished-feature checklist |
 
 Fix the underlying issue and push a corrective commit, or rerun a failed run
 after correcting a secret/environment issue. Use actual author identities and

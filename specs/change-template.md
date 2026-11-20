@@ -38,6 +38,6 @@ treat a proposed feature as approved just because it appears here.
 
 ## Verification and delivery
 
-Relevant checks, local/browser verification, commit/PR, Actions run URL,
+Relevant checks, browser verification on tailvic.in, commit/PR, Actions run URL,
 deployment URL, live acceptance results and rollback considerations. Record
 anything not verified and why. Update status only when evidence supports it.

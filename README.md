@@ -1,101 +1,74 @@
 # Tailvic
 
-Source for the selected Tailvic design currently deployed at
-https://tailvic.in/ in the Vercel **Tailvic** workspace,
-project **tailvic-demo**.
+Live website: **https://tailvic.in/**
 
-New developers and coding agents: start with [AGENTS.md](AGENTS.md) and the
-[development handover](docs/handover.md). Claude Code can use [CLAUDE.md](CLAUDE.md).
-See [architecture](docs/architecture.md), [operations](docs/operations.md) and
-the [current site baseline](specs/current-site.md) for the context behind the code.
+This repository is the source for the website deployed to the Vercel workspace
+`tailvic`, project `tailvic-demo`. Development handover covers the deployed web
+experience, its delivery pipeline and unfinished features.
 
-This folder is self-contained. It includes the chosen backup design, responsive
-pages, fonts and images, fixed customer/admin sign-in pages, static exporter,
-Vercel configuration and tests. It does not depend on the original backup folder.
+## Live links
 
-## Build and view the deployed version locally
+- Website: https://tailvic.in/
+- Services: https://tailvic.in/services/
+- Sign in: https://tailvic.in/account/
+- Customer dashboard: https://tailvic.in/account/dashboard/
+- Admin dashboard: https://tailvic.in/admin/
+- Mobile preview: https://tailvic.in/static/phone-preview.html
+- Alternate URL: https://tailvic-demo.vercel.app/
 
-Use Python 3.11 or newer. From this folder in PowerShell:
+## Current admin and user credentials
 
-```powershell
-python -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r requirements.txt
-.\.venv\Scripts\python.exe scripts/export_preview.py
-.\.venv\Scripts\python.exe -m http.server 5008 --bind 127.0.0.1 --directory public
-```
+Use https://tailvic.in/account/ to sign in.
 
-Open http://127.0.0.1:5008/. The sign-in page is `/account/`. An interactive
-390px phone preview is available at `/static/phone-preview.html`.
-Stop the local server with Ctrl+C.
+| Role | Email | Password |
+| --- | --- | --- |
+| Admin | `admin@tailvic.example` | `TailvicDemo2026!` |
+| User | `customer@tailvic.example` | `TailvicDemo2026!` |
 
-The static build exports 35 public routes into `public/`. Temporary seeded
-SQLite is used only while rendering the pages. No database is deployed, and
-no existing customer data is read. Generated output is ignored by Git.
+These fixed accounts are implemented in public browser JavaScript. They provide
+role-specific presentation, not secure authentication. Dashboards contain empty
+states and public service information. No real private records or payments are
+stored behind them. These are site test identities, not hosting/GitHub credentials.
+The visible website does not display these login details or demo banners.
 
-## Current functionality
+## Start here: colleague or coding agent
 
-The homepage, information pages, service filters, navigation and fixed account
-roles work in the browser. No registration, OTP, payments, booking submission,
-pet creation or dashboard editing is enabled. Booking and application pages
-offer contact options. Dashboards show empty states and the public service menu.
+1. Read [AGENTS.md](AGENTS.md) and [the handover](docs/handover.md).
+2. Read [unfinished tasks](docs/tasks.md) before assuming a feature already works.
+3. Use [architecture](docs/architecture.md) to find the relevant source.
+4. Follow [operations](docs/operations.md) to deploy and verify on `tailvic.in`.
 
-The fixed logins are implemented in `static/demo-login.js` using session storage.
-Their values are downloadable with the public JavaScript; they are not secrets
-or secure authentication. No private records should be added behind these roles.
-The visible pages do not display credentials or demo labels.
+Claude Code has [CLAUDE.md](CLAUDE.md) importing the shared agent instructions.
+Substantial feature requests can use [the change template](specs/change-template.md).
+The [current site baseline](specs/current-site.md) records existing behaviour.
 
-The original Flask backend source is included for future development. Running
-`app.py` starts that separate database-backed application; use the static build
-commands above to reproduce the Vercel version.
+## How changes reach the website
 
-## Verify
+Pushes to `main` automatically run `.github/workflows/ci.yml`: install dependencies,
+run the application/site checks, export the public site, build with Vercel CLI,
+and deploy the prebuilt result to the existing production project. The successful
+production deployment updates `tailvic.in`. Pull requests run validation only;
+automatic PR preview deployments are not configured.
 
-```powershell
-.\.venv\Scripts\python.exe -m unittest discover -s tests -v
-```
+The deployed site consists of static HTML, CSS, JavaScript, images and fonts.
+Python/Flask/Jinja render those files during the build. No persistent database
+or application server is deployed. Do not confuse backend code in the repository
+with functionality available on the website.
 
-The checks cover the Flask source and the generated public site's page/asset
-references, login form restrictions and exclusion of private database files.
+Follow the exact commit's run at
+https://github.com/akmishranitd-tvk/tailvic/actions, then check the changed page and
+requested interactions on the live domain. A successful push alone is not proof
+that a change is deployed or correct.
 
-## Repository and deployment pipeline
+## Deployment access
 
-Repository: https://github.com/akmishranitd-tvk/tailvic
+GitHub Actions uses encrypted repository secrets `VERCEL_TOKEN`, `VERCEL_ORG_ID`
+and `VERCEL_PROJECT_ID`. Hosting tokens, account passwords and private data must
+not be added to this README or committed anywhere. The owner confirmed a
+project-scoped deployment token with a 90-day expiry; check its actual expiry in
+Vercel and rotate it before expiry. See the operations guide.
 
-The production branch is `main`. `.github/workflows/ci.yml` runs the application
-checks and static build on pushes to `main` and pull requests targeting `main`.
-Validation uses Python 3.11 and needs no deployment secrets; the production
-deployment step uses the encrypted secrets listed below.
-
-GitHub Actions deploys production after successful checks on every push to
-`main`, or a manual run selected on `main`. Pull requests run checks without
-receiving deployment credentials or publishing production. The workflow builds
-with Vercel CLI and uploads the prebuilt result to the existing project.
-
-- Live domains: https://tailvic.in/ and https://www.tailvic.in/
-- Vercel project: `tailvic/tailvic-demo`
-- Framework preset: Other (`null`)
-- Root directory: repository root
-- Python version: 3.11 (`.python-version`)
-- Output directory: `public`
-- Build command is defined in `vercel.json`; failed checks stop publishing.
-- No database is needed for this static site.
-
-## Deployment credentials
-
-The deployment step reads three encrypted GitHub repository secrets:
-`VERCEL_TOKEN`, `VERCEL_ORG_ID`, and `VERCEL_PROJECT_ID`. No token is committed
-to source. Use a token scoped to the existing Tailvic project, and rotate it
-before expiry. Store the new token in the repository's Actions secrets.
-Collaborators who can change trusted workflows can use the deployment secret
-to deploy to this project.
-
-Vercel's native connector requires ownership of a repository held by a personal
-GitHub account, so collaborator access alone cannot connect this repository.
-This project instead uses the documented external GitHub Actions method:
-https://vercel.com/kb/guide/how-can-i-use-github-actions-with-vercel.
-Do not enable a second deployment trigger alongside this workflow.
-
-Local databases, session keys, Vercel sign-in tokens, virtual environments and
-generated files are excluded by `.gitignore` and `.vercelignore`. Do not add
-credentials from your computer or hosting account. Source content is in
-`content.py`, `homepage_content.py`, `templates/` and `static/`.
+The pipeline uses Python 3.11, Node.js 24, `uv`, and Vercel CLI 66.2.0. Build
+settings live in `vercel.json`. Keep the existing Vercel project and domain
+configuration for routine changes. Generated output, databases and credentials
+are ignored by Git.

@@ -39,7 +39,7 @@ separate intentional task, not part of routine content edits.
 
 | Path | Responsibility |
 | --- | --- |
-| `app.py` | Flask application factory, public routes, local database/backend flows |
+| `app.py` | Build-time Flask application factory and routes; undeployed backend code |
 | `content.py` | Seed service menu, articles, policy and supporting content |
 | `homepage_content.py` | Homepage section data and breed/story visuals |
 | `templates/base.html` | Shared page shell, navigation and footer |
@@ -50,32 +50,27 @@ separate intentional task, not part of routine content edits.
 | `static/style.css`, `home-refresh.css` | Shared styling and selected homepage design |
 | `static/app.js` | Navigation, service filters and progressive enhancement |
 | `static/demo-login.js`, `demo-login.css` | Fixed browser login and role-based presentation |
-| `static/images/`, `static/fonts/` | Committed local images, fonts and font licence |
+| `static/images/`, `static/fonts/` | Committed images, fonts and font licence |
 | `scripts/export_preview.py` | Production static export and route/form checks |
 | `tests/test_app.py` | Flask/backend behaviour checks using disposable test data |
 | `tests/test_preview.py` | Exported references, forms and publication-boundary checks |
 | `.github/workflows/ci.yml` | Tests, build and production deployment |
 | `vercel.json` | Static build/output and response headers |
 
-## Local backend versus exported site
+## What the deployed website does not run
 
-Running `python app.py` starts the original Flask/SQLite application. It has
-registration, booking, UPI-reference, recruitment and admin operations that are
-not enabled by the static export. These routes are useful source for future
-work, but testing them locally does not prove the corresponding production
-feature exists. UPI-reference handling is not automatic bank settlement.
+The Flask/SQLite backend code is not a production application server. Routes
+for registration, bookings, recruitment, payments and editing must not be
+presented as web capabilities merely because their source exists. Production
+publishes the generated public pages and approved assets only.
 
-To reproduce production, run the exporter and serve `public/` with a static
-HTTP server. In particular, verify account and booking changes there.
-
-`app.py` may create ignored local session-key files under `instance/`; tests
-use disposable databases. Never deploy those files. Vercel receives the prebuilt
-static output, not a persistent SQLite service.
+Vercel receives the prebuilt static output, not a persistent SQLite service.
+See `docs/tasks.md` for the unfinished features and their dependencies.
 
 ## Working boundaries
 
 Changing a source template or content seed requires rebuilding the export.
-Changing an admin-editable local database does not update production. New public
+The current website has no persistent admin content-editing capability. New public
 routes and asset types may require exporter changes and publication checks.
 Keep credentials, private routes and backend POST forms out of static output.
 

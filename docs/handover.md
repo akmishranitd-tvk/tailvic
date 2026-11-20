@@ -1,96 +1,65 @@
-# Tailvic development handover
+# Tailvic web development handover
 
-Last reviewed: 2026-11-20. Intended for the next four weeks of development by
-the owner's colleague and a coding agent, including Claude Code.
+Reviewed: 2026-11-20. This handover supports the owner's colleague and coding
+agent developing the deployed website over the next four weeks.
 
-## First session
-
-1. Read `AGENTS.md` and `README.md`, then `docs/architecture.md`.
-2. Install dependencies, run the checks and open the generated static site.
-3. Read `docs/operations.md` before publishing. A push to `main` changes the
-   live site automatically after successful checks.
-4. Get the next requested change and its acceptance criteria from the owner.
-   A four-week feature roadmap has not yet been approved.
-
-Suggested opening prompt for any coding agent:
-
-> Read AGENTS.md, docs/handover.md and the linked architecture/operations notes.
-> Explain the current production behaviour and limitations before implementing
-> my requested change. Use the current repository as source. When I request
-> deployment, push through the documented main-branch pipeline, watch the run,
-> and verify the requested result on tailvic.in. Report what was checked.
-
-## Current production baseline
+## Starting point
 
 - Repository: https://github.com/akmishranitd-tvk/tailvic (private).
-- Live: https://tailvic.in/ and https://www.tailvic.in/.
+- Production: https://tailvic.in/ and https://www.tailvic.in/.
 - Alternate: https://tailvic-demo.vercel.app/.
 - Vercel workspace/project: `tailvic/tailvic-demo`.
-- Selected design originated from a backup; all necessary source is now in this
-  repository. No external backup folder is needed to build or develop it.
-- Python 3.11, Flask/Jinja for rendering, vanilla JavaScript/CSS and local assets.
-- Static export of 35 public routes at handover. No live database or application
-  server is required by the deployed site.
+- Current admin/user credentials and live account links are in `README.md`.
 
-The pre-handover production baseline is commit `4eb5764`, which passed all 25
-checks and deployed through GitHub Actions. Its successful run is
-https://github.com/akmishranitd-tvk/tailvic/actions/runs/44699449267.
-Future commits and Actions runs supersede this dated baseline.
+Production publishes a static export of the selected Tailvic design. The
+repository contains the complete source; other machine folders are not needed.
+The website currently has public content, service filters, navigation, care
+guides, contact links and fixed browser account roles. These roles are not secure
+server-side authentication. No persistent application database is deployed.
 
-## Works today
+The functional production baseline before handover documentation was `4eb5764`,
+verified by https://github.com/akmishranitd-tvk/tailvic/actions/runs/44699449267.
+Use current Git history and the exact latest successful deployment to establish
+what is live now; dated notes do not override newer delivered changes.
 
-Public content pages, responsive navigation, service filters, care guides,
-contact links, and fixed customer/admin browser sign-in flows. The account page
-is `/account/`; customer landing is `/account/dashboard/`; admin is `/admin/`.
-Dashboards use empty states and the public service menu. Browser role values
-are stored in session storage, so account testing must include sign-out or a
-fresh browser session. The fixed test identities are defined in
-`static/demo-login.js`; they are public application code, not private secrets.
+## Recommended opening prompt
 
-## Not enabled in production
-
-New-user registration, email OTP, secure server-side authentication, persistent
-users/pets/appointments, booking submissions, payment processing, dashboard
-editing and application submissions. Booking and careers pages direct visitors
-to contact the team. Do not infer production support from routes in `app.py`:
-the exporter deliberately replaces several of them.
-
-Real accounts, persistence and OTP were discussed earlier, but no database
-provider or implementation has been approved. Neon is not currently required
-or connected. There is no JavaScript framework migration to continue.
+> Read AGENTS.md, README.md, docs/handover.md and docs/tasks.md. Focus on the
+> deployed website at tailvic.in. Explain the relevant current behaviour before
+> implementing my change. When I ask you to deploy, push through the documented
+> main-branch pipeline, watch that commit's Actions run, and check my requested
+> result on tailvic.in. Report what passed and anything you could not verify.
 
 ## Owner decisions to preserve
 
-- Preserve the currently selected Tailvic visual design unless requested.
+- Keep the selected responsive Tailvic visual design unless asked to change it.
 - Keep visible pages free of demo labels and displayed login credentials.
-- Keep service/pricing pages focused on Tailvic; competitor comparisons and the
-  published-reference pricing table were removed at the owner's request.
-- Domain is registered at GoDaddy; Vercel hosts the existing project.
-- Deploy through GitHub Actions on `main`. Repository collaboration does not
-  require sharing the owner's account passwords or local CLI credentials.
+  Repository documentation intentionally includes the fixed test identities.
+- Keep service/pricing content focused on Tailvic; competitor comparisons and
+  the published-reference table were removed at the owner's request.
+- Use the existing Vercel project and GoDaddy-registered domain.
+- Publish through GitHub Actions on `main`; no extra native Git deployment hook.
+- Do not assume secure accounts, OTP, database or real bookings already work.
 
-## Next four weeks
+## Work still to do
 
-Use the owner's requested tasks as the backlog. For a substantial feature,
-start from `specs/change-template.md`, separate approved requirements from open
-questions, then record implementation and verification evidence. Authentication,
-persistence and real bookings are possible future work, not an instruction to
-enable them automatically. Confirm product behaviour, data handling and hosting
-requirements as part of those changes.
+See `docs/tasks.md` for the explicit unfinished-work checklist and dependencies.
+There is no approved four-week feature order yet. Take the owner's next requests
+as priorities, clarify missing acceptance criteria, and use the spec template for
+substantial new behaviour. Future feature ideas are not approval to activate them.
 
-At the end of a task, update the relevant spec and docs if assumptions changed.
-At the end of the handover period, update this file with the current baseline,
-remaining work, known issues and links to important decisions/Actions runs.
+After each delivered change, update affected docs and task status with commit,
+Actions run and live verification evidence. At the end of four weeks update this
+handover with current production behaviour, remaining work and important decisions.
 
-## Context map
+## Documentation map
 
-- `README.md`: setup and basic development commands.
-- `AGENTS.md`: shared instructions and definition of completion.
-- `CLAUDE.md`: Claude's entry point importing shared guidance.
-- `docs/architecture.md`: source map and deployed/local behaviour.
-- `docs/operations.md`: publishing, live verification, rollback and secrets.
-- `specs/current-site.md`: current production behaviour to preserve.
+- `README.md`: web links, account details and deployment overview.
+- `AGENTS.md` / `CLAUDE.md`: shared instructions and Claude entry point.
+- `docs/tasks.md`: unfinished capabilities and operational follow-up.
+- `docs/architecture.md`: deployed architecture and source map.
+- `docs/operations.md`: pipeline, live verification, rollback and credential renewal.
+- `specs/current-site.md`: behaviour currently supported by production.
 - `specs/change-template.md`: lightweight feature specification.
 
-Keep secrets and private customer information out of these documents. Source
-and operational docs should evolve together; an external wiki is optional.
+Keep hosting credentials and real private data out of all documentation.
