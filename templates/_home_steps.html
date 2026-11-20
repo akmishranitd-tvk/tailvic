@@ -1,0 +1,8 @@
+{% from '_icons.html' import icon %}
+<section class="section appointment-journey" id="how-it-works"><div class="container">
+  <div class="section-heading centered"><span class="eyebrow">FROM FIRST HELLO TO FRESHLY GROOMED</span><h2>Your appointment,<br><span class="serif">step by step.</span></h2></div>
+  <div class="journey-grid">{% for number,symbol,title,copy in [('01','pet','Tell us about your pet','Share their coat, size, handling preferences, and your locality.'),('02','calendar','Review the details','Choose a published slot or request a time. Confirm your complete quote.'),('03','home','Welcome your groomer','Get your preparation checklist and groomer details before they arrive at your home.'),('04','notes','Keep the aftercare notes','Enjoy a fresher coat and a few helpful aftercare notes.')] %}
+    <article><div class="journey-top"><span class="journey-number">{{ number }}</span><span class="journey-icon">{{ icon(symbol) }}</span></div><h3>{{ title }}</h3><p>{{ copy }}</p><span class="journey-arrow" aria-hidden="true">↗</span></article>
+  {% endfor %}</div>
+  <div class="center"><a class="button" href="/book/">Request an appointment ↗</a></div>
+</div></section>

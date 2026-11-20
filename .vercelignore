@@ -12,7 +12,6 @@ node_modules
 .local-admin.txt
 instance
 test-results
-tests
 output
 __pycache__
 *.log

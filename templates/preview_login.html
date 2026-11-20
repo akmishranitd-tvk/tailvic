@@ -1,0 +1,6 @@
+{% extends 'base.html' %}
+{% block head %}<link rel="stylesheet" href="/static/demo-login.css"><script src="/static/demo-login.js" defer></script>{% endblock %}
+{% block content %}
+<div class="container" data-demo-page="login"><div class="page-hero"><span class="eyebrow">WELCOME TO TAILVIC</span><h1>A little place<span class="serif"> for your pet.</span></h1><p>Sign in to your care corner.</p></div>
+<div class="page-content"><form class="form-card" style="max-width:520px;margin:0 auto" action="#" data-demo-login><h2>Welcome back.</h2><label class="field"><span>Email</span><input id="demo-email" type="email" required autocomplete="username"></label><label class="field"><span>Password</span><input id="demo-password" type="password" required autocomplete="current-password"></label><p class="error-box" data-demo-error role="alert" hidden>Those details don’t match. Please try again.</p><button class="button full" data-demo-submit disabled>Sign in ↗</button><noscript><p>Please enable JavaScript to sign in.</p></noscript></form></div></div>
+{% endblock %}

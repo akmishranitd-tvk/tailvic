@@ -1,0 +1,8 @@
+<section class="section grooming-stories" id="grooming-stories" aria-labelledby="stories-title">
+  <div class="container"><div class="section-heading row"><div><span class="eyebrow">BEFORE THE BRUSH. AFTER THE FINISH.</span><h2 id="stories-title">Fresh looks.<br><span class="serif">The same familiar friend.</span></h2></div><button type="button" class="button outline small" data-story-toggle aria-pressed="false" aria-controls="story-marquee">Pause stories</button></div><p class="story-disclosure">Illustrative grooming concepts, created to show possible styling approaches. These are not customer results or promises of a particular outcome.</p></div>
+  <div class="story-marquee" id="story-marquee" data-paused="false"><div class="story-track">
+    {% for duplicate in [false,true] %}<div class="story-group" {% if duplicate %}aria-hidden="true" inert{% endif %}>
+      {% for story in grooming_stories %}<article class="story-card"><figure><img src="{{ url_for('static',filename='images/'+story.image) }}" alt="{{ story.alt if not duplicate else '' }}" width="1536" height="1024" loading="lazy"><figcaption><span>Before</span><span>After</span></figcaption></figure><div class="story-copy"><span class="story-pet">{{ story.name }} · {{ story.breed }}</span><h3>{{ story.title }}</h3><p>{{ story['copy'] }}</p></div></article>{% endfor %}
+    </div>{% endfor %}
+  </div></div>
+</section>

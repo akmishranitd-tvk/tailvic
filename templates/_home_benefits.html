@@ -1,0 +1,4 @@
+<section class="section home-benefits" id="why-home"><div class="container">
+  <div class="section-heading centered"><span class="eyebrow">GOOD CARE. HOME COMFORTS.</span><h2>A familiar place.<br><span class="serif">A different grooming day.</span></h2></div>
+  <div class="picture-benefit-grid">{% for benefit in home_benefits %}<article><div class="benefit-picture"><img src="{{ url_for('static',filename='images/'+benefit.image) }}" alt="{{ benefit.alt }}" width="176" height="176" loading="lazy"></div><h3>{{ benefit.title }}</h3><p>{{ benefit['copy'] }}</p></article>{% endfor %}</div>
+</div></section>

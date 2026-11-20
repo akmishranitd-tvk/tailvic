@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block head %}<link rel="stylesheet" href="/static/demo-login.css"><script src="/static/demo-login.js" defer></script>{% endblock %}
+{% block content %}
+<div class="container" data-demo-page="{{ demo_role }}"><p class="demo-checking">Checking access… <a href="/account/">Sign in</a></p><div data-demo-protected hidden>
+<div class="page-hero account-heading"><div><span class="eyebrow">{{ 'OWNER STUDIO' if demo_role=='admin' else 'YOUR CARE CORNER' }}</span><h1>{{ 'Your appointments.' if demo_role=='admin' else 'Hello, Maya.' }}<span class="serif"> {{ 'Your team.' if demo_role=='admin' else 'A good care day awaits.' }}</span></h1><p>{{ 'Keep an eye on the Tailvic care day.' if demo_role=='admin' else 'Your companions and care, together in one place.' }}</p></div><button type="button" class="button outline small" data-demo-logout>Sign out</button></div>
+<div class="page-content">
+{% if demo_role=='admin' %}
+<section class="admin-section"><h2>The service menu.</h2>{% for s in services %}<details><summary>{{ s.name }} · {{ s.price|money }}</summary><div class="admin-booking-content"><p>{{ s.description }}</p><p>{{ s.duration }}</p></div></details>{% endfor %}</section>
+<section class="admin-section"><h2>Appointments.</h2><p>No appointments to display.</p></section>
+<section class="admin-section"><h2>Availability.</h2><p>Online scheduling is currently unavailable.</p></section>
+{% else %}
+<div class="account-content"><section><h2>Your care days.</h2><p>No appointments to display.</p><a class="button" href="/services/">Explore care options ↗</a></section><section><h2>Your companions.</h2><p>No pets added.</p></section></div>
+{% endif %}
+</div></div></div>
+{% endblock %}

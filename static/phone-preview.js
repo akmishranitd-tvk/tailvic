@@ -1,0 +1,1 @@
+(()=>{function fitPhone(){const header=document.querySelector('header').offsetHeight;const scale=Math.max(.2,Math.min(1,(window.innerHeight-header-30)/926,(window.innerWidth-44)/414));document.documentElement.style.setProperty('--phone-scale',String(scale));}fitPhone();window.addEventListener('resize',fitPhone);})();

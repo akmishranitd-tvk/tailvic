@@ -1,0 +1,12 @@
+<section class="admin-section" id="applications">
+  <div class="section-heading row"><div><span class="eyebrow">PEOPLE & OPPORTUNITIES</span><h2>Groomer applications.</h2></div><span class="status">{{ applications|length }} received</span></div>
+  <p>Applications are private to the owner studio. Review experience and contact candidates directly; no automatic recruitment messages are sent.</p>
+  {% for application in applications %}
+  <details><summary>{{ application.name }} · {{ application.city }} <span class="status">{{ application.status }}</span></summary>
+    <div class="admin-booking-content">
+      <dl class="detail-list"><dt>Reference</dt><dd>{{ application.id }}</dd><dt>Received</dt><dd>{{ application.created|datefmt }}</dd><dt>Contact</dt><dd>{{ application.email }}<br>{{ application.phone }}</dd><dt>Experience</dt><dd>{{ application.experience|replace('-',' ') }}</dd><dt>Species</dt><dd>{{ application.species|title }}</dd><dt>Availability</dt><dd>{{ application.availability }}</dd><dt>Training / skills</dt><dd class="preserve-lines">{{ application.qualification or 'Not provided' }}</dd><dt>Introduction</dt><dd class="preserve-lines">{{ application.message or 'Not provided' }}</dd>{% if application.portfolio %}<dt>Portfolio / CV</dt><dd><a class="text-link" href="{{ application.portfolio }}" target="_blank" rel="noopener noreferrer">Open candidate-provided link ↗</a></dd>{% endif %}</dl>
+      <form method="post"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="action" value="application_status"><input type="hidden" name="application_id" value="{{ application.id }}"><input type="hidden" name="section" value="applications"><div class="form-grid"><label class="field"><span>Review status</span><select name="status">{% for status in ['new','reviewing','contacted','shortlisted','closed'] %}<option value="{{ status }}" {{ 'selected' if application.status==status }}>{{ status|title }}</option>{% endfor %}</select></label><div><br><button class="button small">Save review status</button></div></div></form>
+    </div>
+  </details>
+  {% else %}<div class="empty-state"><h3>Ready for your next teammate.</h3><p>Submissions from the <a href="/careers/">careers page</a> will appear here.</p></div>{% endfor %}
+</section>

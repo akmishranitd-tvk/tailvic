@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+  <div class="page-hero"><div class="breadcrumbs"><a href="/">Home</a> / Careers</div><span class="eyebrow">BUILD YOUR CAREER WITH TAILVIC</span><h1>Skilled hands.<br><span class="serif">A place to grow.</span></h1><p>Enjoy working with pets and the people who love them? Introduce yourself for grooming opportunities in Gurgaon.</p></div>
+  <div class="page-content form-layout">
+    <div>
+      {% if submitted %}<section class="application-success" role="status"><span class="eyebrow">APPLICATION RECEIVED</span><h2>Thanks for introducing yourself.</h2><p>Your reference is <strong>{{ submitted }}</strong>. Your application is saved for the Tailvic team to review. We’ll contact you if there is a suitable opportunity.</p><p>No automated email has been sent. For a correction or question, email <a href="mailto:tailvic@gmail.com">tailvic@gmail.com</a> with your reference.</p><a class="button outline" href="/careers/">Back to careers ↗</a></section>
+      {% else %}
+      <form method="post" class="form-card" id="application-form">
+        <input type="hidden" name="csrf" value="{{ csrf }}">
+        {% if error %}<div class="error-box" role="alert">{{ error }}</div>{% endif %}
+        <div class="honeypot" aria-hidden="true"><label>Leave this field empty<input name="website" tabindex="-1" autocomplete="off"></label></div>
+        <fieldset><legend>01 · Introduce yourself</legend><div class="form-grid">
+          <label class="field"><span>Full name *</span><input name="name" required maxlength="100" autocomplete="name" value="{{ form.get('name','') }}"></label>
+          <label class="field"><span>Phone number *</span><input name="phone" type="tel" required maxlength="25" autocomplete="tel" value="{{ form.get('phone','') }}"></label>
+          <label class="field"><span>Email *</span><input name="email" type="email" required maxlength="200" autocomplete="email" value="{{ form.get('email','') }}"></label>
+          <label class="field"><span>Current city / locality *</span><input name="city" required maxlength="100" autocomplete="address-level2" value="{{ form.get('city','') }}"></label>
+        </div></fieldset>
+        <fieldset><legend>02 · Your experience</legend><div class="form-grid">
+          <label class="field"><span>Professional grooming experience *</span><select name="experience" required><option value="">Select experience</option>{% for value,label in [('trainee','New to grooming / seeking training'),('under-1','Less than 1 year'),('1-3','1–3 years'),('3-5','3–5 years'),('5-plus','More than 5 years')] %}<option value="{{ value }}" {{ 'selected' if form.get('experience')==value }}>{{ label }}</option>{% endfor %}</select></label>
+          <label class="field"><span>Grooming experience with *</span><select name="species" required><option value="">Select experience</option>{% for value,label in [('dog','Dogs'),('cat','Cats'),('both','Dogs and cats'),('learning','Not yet / looking to train')] %}<option value="{{ value }}" {{ 'selected' if form.get('species')==value }}>{{ label }}</option>{% endfor %}</select></label>
+          <label class="field span-2"><span>Training, skills, or qualifications</span><textarea name="qualification" maxlength="1000" placeholder="Courses, salon or home-grooming experience, coat skills, handling approach">{{ form.get('qualification','') }}</textarea></label>
+          <label class="field span-2"><span>When could you start? *</span><input name="availability" required maxlength="200" value="{{ form.get('availability','') }}" placeholder="For example: available next month, weekdays"></label>
+          <label class="field span-2"><span>Portfolio or CV link (optional)</span><input name="portfolio" type="url" maxlength="500" value="{{ form.get('portfolio','') }}" placeholder="https://"><small>Use a view-only link with permission to share. Avoid identity documents or banking details.</small></label>
+          <label class="field span-2"><span>What would you like us to know?</span><textarea name="message" maxlength="3000" rows="5" placeholder="Tell us about the work you enjoy and what you’re looking for.">{{ form.get('message','') }}</textarea></label>
+        </div></fieldset>
+        <label class="checkbox-label"><input name="consent" type="checkbox" required {{ 'checked' if form.get('consent') }}><span>I agree that Tailvic can use these details to review my application and contact me about it, as described in the <a href="/privacy/">privacy notice</a>.</span></label>
+        <button class="button full">Submit my application <span>↗</span></button>
+        <p class="fineprint">Applications are expressions of interest, not employment offers. We discuss role scope, availability, and terms individually. No recruitment payment is requested through this form.</p>
+      </form>
+      {% endif %}
+    </div>
+    <aside class="careers-aside"><span class="eyebrow">WHAT MATTERS TO US</span><h2>Good technique.<br>Even better judgement.</h2><p>We’re interested in people who listen to pet parents, recognize when a pet needs a break, and take pride in their work.</p><ul class="check-list"><li>Patient, species-appropriate handling</li><li>Clean equipment and a tidy workspace</li><li>Clear communication about scope and timing</li><li>Willingness to learn and share feedback</li></ul><div class="career-process"><h3>What happens next?</h3><ol><li>The team reviews your application.</li><li>We contact you if there is a potential fit.</li><li>Experience and relevant qualifications are checked before any appointment assignment.</li></ol></div><a class="text-link" href="/care-standards/">Read our care approach ↗</a></aside>
+  </div>
+</div>
+{% endblock %}

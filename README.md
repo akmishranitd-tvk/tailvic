@@ -1,7 +1,7 @@
 # Tailvic
 
 Source for the selected Tailvic design currently deployed at
-https://tailvic-demo.vercel.app/ in the Vercel **Tailvic** workspace,
+https://tailvic.in/ in the Vercel **Tailvic** workspace,
 project **tailvic-demo**.
 
 This folder is self-contained. It includes the chosen backup design, responsive
@@ -52,40 +52,43 @@ commands above to reproduce the Vercel version.
 The checks cover the Flask source and the generated public site's page/asset
 references, login form restrictions and exclusion of private database files.
 
-## Push this folder to Git
+## Repository and deployment pipeline
 
-Create an empty repository on your Git provider, then run these commands from
-this folder, replacing `YOUR_REPOSITORY_URL` with its clone URL:
+Repository: https://github.com/akmishranitd-tvk/tailvic
 
-```powershell
-git init
-git add .
-git status
-git commit -m "Add Tailvic website and Vercel static build"
-git branch -M main
-git remote add origin YOUR_REPOSITORY_URL
-git push -u origin main
-```
+The production branch is `main`. `.github/workflows/ci.yml` runs the application
+checks and static build on pushes to `main` and pull requests targeting `main`.
+The workflow uses Python 3.11 and needs no deployment secrets.
 
-No repository, commit, remote or automatic deployment integration has been
-created for you. Share the repository URL when ready to connect it to the
-existing Vercel project.
+Vercel's native GitHub integration connects this repository to the existing
+`tailvic/tailvic-demo` project. Its production branch must be `main`. A push to
+that branch triggers a production build; other eligible branches can create
+preview deployments. GitHub CI and Vercel run independently; Vercel's own build
+also runs the full checks before publishing, so a failed check blocks that
+production build. The prior deployment remains live if the build fails.
 
-## Vercel settings for the later Git integration
-
-- Workspace: Tailvic (`tailvic`)
-- Existing project: `tailvic-demo`
-- Root directory: repository root
+- Live domains: https://tailvic.in/ and https://www.tailvic.in/
+- Vercel URL: https://tailvic-demo.vercel.app/
 - Framework preset: Other (`null`)
-- Build command: `python -m pip install -r requirements.txt && python scripts/export_preview.py`
+- Root directory: repository root
+- Python version: 3.11 (`.python-version`)
 - Output directory: `public`
-- Production branch: `main`
-- No database, account secrets or environment variables are needed for this build.
+- Build command is defined in `vercel.json` and installs dependencies, runs the
+  checks, then exports the site.
+- No database or account secrets are required for this static build.
 
-`vercel.json` contains the build and output settings. Preserve framework `null`
-so the deployed result is the static export. After integration is connected,
-pushes to the production branch can deploy production; other branches can
-receive preview deployments, subject to repository and Vercel permissions.
+To connect or repair the integration, sign in to the Tailvic Vercel account,
+connect the GitHub login under account Authentication, and grant the Vercel
+GitHub App access to this repository. The repository owner may need to approve
+that installation. In the Vercel project's Git settings, connect this repository
+and select `main` as the production branch. Keep the existing project so its
+custom domains continue to follow deployments.
+
+Vercel Hobby restricts automatic deployments from private repositories to
+commits authored by the Hobby project owner's connected Git identity.
+Collaborator access to GitHub alone does not grant everyone Vercel deployment
+rights. Team-authored production deployments require a supported Vercel plan
+and permissions. See https://vercel.com/docs/deployments/troubleshoot-project-collaboration.
 
 Local databases, session keys, Vercel sign-in tokens, virtual environments and
 generated files are excluded by `.gitignore` and `.vercelignore`. Do not add

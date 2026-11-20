@@ -1,0 +1,4 @@
+{% from '_icons.html' import icon %}
+<section class="core-pillars" aria-label="Four pillars of Tailvic care"><div class="container pillar-grid">
+{% for pillar in pillars %}<article><div class="pillar-icon">{{ icon(pillar.icon) }}</div><div><h2>{{ pillar.title }}</h2><p>{{ pillar['copy'] }}</p></div></article>{% endfor %}
+</div></section>
