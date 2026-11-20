@@ -60,35 +60,34 @@ The production branch is `main`. `.github/workflows/ci.yml` runs the application
 checks and static build on pushes to `main` and pull requests targeting `main`.
 The workflow uses Python 3.11 and needs no deployment secrets.
 
-Vercel's native GitHub integration connects this repository to the existing
-`tailvic/tailvic-demo` project. Its production branch must be `main`. A push to
-that branch triggers a production build; other eligible branches can create
-preview deployments. GitHub CI and Vercel run independently; Vercel's own build
-also runs the full checks before publishing, so a failed check blocks that
-production build. The prior deployment remains live if the build fails.
+GitHub Actions deploys production after successful checks on every push to
+`main`, or a manual run selected on `main`. Pull requests run checks without
+receiving deployment credentials or publishing production. The workflow builds
+with Vercel CLI and uploads the prebuilt result to the existing project.
 
 - Live domains: https://tailvic.in/ and https://www.tailvic.in/
-- Vercel URL: https://tailvic-demo.vercel.app/
+- Vercel project: `tailvic/tailvic-demo`
 - Framework preset: Other (`null`)
 - Root directory: repository root
 - Python version: 3.11 (`.python-version`)
 - Output directory: `public`
-- Build command is defined in `vercel.json` and installs dependencies, runs the
-  checks, then exports the site.
-- No database or account secrets are required for this static build.
+- Build command is defined in `vercel.json`; failed checks stop publishing.
+- No database is needed for this static site.
 
-To connect or repair the integration, sign in to the Tailvic Vercel account,
-connect the GitHub login under account Authentication, and grant the Vercel
-GitHub App access to this repository. The repository owner may need to approve
-that installation. In the Vercel project's Git settings, connect this repository
-and select `main` as the production branch. Keep the existing project so its
-custom domains continue to follow deployments.
+## Deployment credentials
 
-Vercel Hobby restricts automatic deployments from private repositories to
-commits authored by the Hobby project owner's connected Git identity.
-Collaborator access to GitHub alone does not grant everyone Vercel deployment
-rights. Team-authored production deployments require a supported Vercel plan
-and permissions. See https://vercel.com/docs/deployments/troubleshoot-project-collaboration.
+The deployment step reads three encrypted GitHub repository secrets:
+`VERCEL_TOKEN`, `VERCEL_ORG_ID`, and `VERCEL_PROJECT_ID`. No token is committed
+to source. Use a token scoped to the existing Tailvic project, and rotate it
+before expiry. Store the new token in the repository's Actions secrets.
+Collaborators who can change trusted workflows can use the deployment secret
+to deploy to this project.
+
+Vercel's native connector requires ownership of a repository held by a personal
+GitHub account, so collaborator access alone cannot connect this repository.
+This project instead uses the documented external GitHub Actions method:
+https://vercel.com/kb/guide/how-can-i-use-github-actions-with-vercel.
+Do not enable a second deployment trigger alongside this workflow.
 
 Local databases, session keys, Vercel sign-in tokens, virtual environments and
 generated files are excluded by `.gitignore` and `.vercelignore`. Do not add

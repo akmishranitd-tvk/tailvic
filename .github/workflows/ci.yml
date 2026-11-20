@@ -1,4 +1,4 @@
-name: Validate Tailvic
+name: Validate and deploy Tailvic
 
 on:
   push:
@@ -34,3 +34,22 @@ jobs:
         run: python -m unittest discover -s tests -v
       - name: Build the publishable site
         run: python scripts/export_preview.py
+      - name: Set up Node.js for deployment
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+      - name: Install Vercel CLI
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        run: npm install --global vercel@66.2.0
+      - name: Deploy production to Vercel
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          VERCEL_TELEMETRY_DISABLED: "1"
+        run: |
+          vercel pull --yes --environment=production --token "$VERCEL_TOKEN"
+          vercel build --prod --token "$VERCEL_TOKEN"
+          vercel deploy --prebuilt --prod --yes --token "$VERCEL_TOKEN"
