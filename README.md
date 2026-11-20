@@ -4,6 +4,11 @@ Source for the selected Tailvic design currently deployed at
 https://tailvic.in/ in the Vercel **Tailvic** workspace,
 project **tailvic-demo**.
 
+New developers and coding agents: start with [AGENTS.md](AGENTS.md) and the
+[development handover](docs/handover.md). Claude Code can use [CLAUDE.md](CLAUDE.md).
+See [architecture](docs/architecture.md), [operations](docs/operations.md) and
+the [current site baseline](specs/current-site.md) for the context behind the code.
+
 This folder is self-contained. It includes the chosen backup design, responsive
 pages, fonts and images, fixed customer/admin sign-in pages, static exporter,
 Vercel configuration and tests. It does not depend on the original backup folder.
@@ -58,7 +63,8 @@ Repository: https://github.com/akmishranitd-tvk/tailvic
 
 The production branch is `main`. `.github/workflows/ci.yml` runs the application
 checks and static build on pushes to `main` and pull requests targeting `main`.
-The workflow uses Python 3.11 and needs no deployment secrets.
+Validation uses Python 3.11 and needs no deployment secrets; the production
+deployment step uses the encrypted secrets listed below.
 
 GitHub Actions deploys production after successful checks on every push to
 `main`, or a manual run selected on `main`. Pull requests run checks without
