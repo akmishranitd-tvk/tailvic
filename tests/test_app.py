@@ -288,21 +288,19 @@ class TailvicTests(unittest.TestCase):
         self.assertNotIn('<span>tailvic',home)
         self.assertIn('/careers/',home)
 
-    def test_homepage_refresh_and_accessible_story_controls(self):
+    def test_homepage_refresh_has_no_fabricated_profiles_or_customer_stories(self):
         page=self.customer.get('/').get_data(as_text=True)
-        for text in ('Join as groomers','Pet care at your door step','WHAT WE PROMISE TO DELIVER','WHY CHOOSE TAILVIC','Pause stories','aria-controls="story-marquee"','These are not customer results'):
+        for text in ('WHAT WE PROMISE TO DELIVER','A HAPPIER GROOMING DAY','Gurugram Sectors 69, 70 & 71','At-home grooming is currently available in Sectors 69, 70 and 71'):
             self.assertIn(text,page)
-        for text in ('AI-created brand imagery','image-note','class="flower"','Your neighbourhood, our first chapter.','BEFORE THE DOORBELL','A request becomes an appointment after suitability and your complete quote are confirmed.'):
+        for text in ('class="story-card"','Aanya · Grooming stylist','Illustrative team profile','These are not customer results','Book Now','reserve an available published slot'):
             self.assertNotIn(text,page)
-        self.assertEqual(page.count('class="story-card"'),8)
-        self.assertIn('aria-hidden="true" inert',page)
-        for name in ('milo','coco','luna','bruno'):
-            self.assertIn('story-'+name+'.webp',page)
-            with self.customer.get('/static/images/story-'+name+'.webp') as asset:
-                self.assertEqual(asset.status_code,200)
+        team=self.customer.get('/our-groomers/').get_data(as_text=True)
+        self.assertIn('We do not publish groomer profiles yet.',team)
+        for name in ('Aanya','Rohan','Meera'):
+            self.assertNotIn(name,team)
 
     def test_home_copy_and_link_only_breed_navigation(self):
-        from homepage_content import PILLARS, HOME_BENEFITS, WHY_TAILVIC, GROOMING_STORIES
+        from homepage_content import PILLARS, HOME_BENEFITS, WHY_TAILVIC
         page=self.customer.get('/').get_data(as_text=True)
         self.assertNotIn('built-in method',page)
         self.assertNotIn('dict object at',page)
@@ -310,7 +308,7 @@ class TailvicTests(unittest.TestCase):
         self.assertNotIn('home-vs-salon',page)
         self.assertNotIn('class="container final-wrap"',page)
         self.assertNotIn('Book a groom',page)
-        self.assertIn('Book Now',page)
+        self.assertIn('Ask about grooming',page)
         self.assertNotIn('What changes when the appointment comes to you?',page)
         self.assertNotIn('Home grooming can be a good fit for many pets.',page)
         self.assertNotIn('your Gurgaon locality',page)
@@ -321,7 +319,7 @@ class TailvicTests(unittest.TestCase):
             self.assertIn('images/'+benefit['image'],page)
         for reason in WHY_TAILVIC:
             self.assertLessEqual(len(reason['title'].split()),3)
-        for item in HOME_BENEFITS+WHY_TAILVIC+GROOMING_STORIES:
+        for item in HOME_BENEFITS+WHY_TAILVIC:
             self.assertIn(item['copy'],page)
         section=page.split('COAT KNOWLEDGE',1)[1].split('</section>',1)[0]
         self.assertIn('class="breed-chips"',section)
