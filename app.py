@@ -16,7 +16,7 @@ from urllib.parse import urlencode, urlparse
 from flask import Flask, abort, g, jsonify, make_response, redirect, render_template, request, session, url_for
 from werkzeug.security import check_password_hash, generate_password_hash
 from content import SERVICES, ARTICLES, BREEDS, FAQS, POLICIES, SIZE_GUIDES, COPY_BASELINES
-from homepage_content import BREED_VISUALS, PILLARS, HOME_BENEFITS, WHY_TAILVIC, GROOMING_STORIES
+from homepage_content import BREED_VISUALS, PILLARS, HOME_BENEFITS, WHY_TAILVIC
 
 ROOT = Path(__file__).parent
 IST = timezone(timedelta(hours=5, minutes=30))
@@ -77,7 +77,7 @@ def create_app(test_config=None):
                         changed=True
                 if changed:
                     db().execute(f'UPDATE {table} SET data=? WHERE slug=?',(json.dumps(current),item['slug']))
-        for key,value in {'upi':'7845475769@upi','travel_note':'Travel and applicable taxes are confirmed in your complete quote.','coverage':'Gurgaon · starting at 122101'}.items():
+        for key,value in {'upi':'7845475769@upi','travel_note':'Travel and applicable taxes are confirmed in your complete quote.','coverage':'Gurugram · Sectors 69, 70 and 71'}.items():
             db().execute('INSERT OR IGNORE INTO settings VALUES (?,?)',(key,value))
     with app.app_context():
         init_db()
@@ -154,7 +154,7 @@ def create_app(test_config=None):
 
     @app.context_processor
     def context():
-        return dict(current_user=user(),csrf=session.get('csrf'),services=rows('services'),articles=rows('articles'),faqs=FAQS,breeds=BREEDS,year=datetime.now(IST).year,coverage=setting('coverage'),breed_visuals=BREED_VISUALS,pillars=PILLARS,home_benefits=HOME_BENEFITS,why_tailvic=WHY_TAILVIC,grooming_stories=GROOMING_STORIES)
+        return dict(current_user=user(),csrf=session.get('csrf'),services=rows('services'),articles=rows('articles'),faqs=FAQS,breeds=BREEDS,year=datetime.now(IST).year,coverage=setting('coverage'),breed_visuals=BREED_VISUALS,pillars=PILLARS,home_benefits=HOME_BENEFITS,why_tailvic=WHY_TAILVIC)
 
     @app.template_filter('money')
     def money(paise):
@@ -166,7 +166,7 @@ def create_app(test_config=None):
 
     @app.route('/')
     def home():
-        return render_template('home.html',title='At-home pet grooming in Gurgaon | Tailvic',description='Thoughtful dog and cat grooming at home in Gurgaon. Explore packages, reserve a published slot, or request an appointment with Tailvic.')
+        return render_template('home.html',title='At-home dog & cat grooming in Gurugram | Tailvic',description='Warm, thoughtful dog and cat grooming at home in Gurugram Sectors 69, 70 and 71. Ask Tailvic about a visit.')
 
     @app.route('/services/')
     @app.route('/packages/')
@@ -226,10 +226,10 @@ def create_app(test_config=None):
             title,body=POLICIES[page]
             return render_template('info.html',title=title+' | Tailvic',heading=title,body=body,kind=page)
         data={
-          'our-groomers':('The people behind the care.','We are building a team that combines technical skill with patient handling. The sample profiles below illustrate the information we will share before an appointment. They are fictional, not verified Tailvic staff.'),
+          'our-groomers':('The people behind the care.','We do not publish groomer profiles yet. The Tailvic team will confirm who is available and discuss relevant experience before a visit is agreed.'),
           'care-standards':('Thoughtful care. Clear standards.','Our proposed care protocol starts with a suitability conversation, clean equipment, an agreed service, and permission before any change. We pause or stop when continuing is unsuitable.\nWe bring professional grooming tools and appropriate products. Please provide water, electricity, a bathing area where required, and a clean towel. We explain setup, handling, and cleanup before the visit.\nStaff certification and verification claims will be published only after evidence is checked. Ask the team about the assigned groomer before confirming.'),
           'about':('A good care day starts at home.','Tailvic is a Gurgaon pet-care startup built around a simple idea: everyday care should feel easier for pets and their people.\nWe start with at-home grooming and a human booking team. Our longer-term ambition is a connected home-based wellness platform, with new services introduced as qualified teams and care processes become ready.'),
-          'areas':('Hello, Gurgaon.','Our first home is Gurgaon, starting at PIN 122101. Request any Gurgaon locality and we will confirm coverage, travel, and appointment availability.\nRequests are welcome 24/7. Visits happen by appointment. Travel and applicable taxes are quoted separately before confirmation.'),
+          'areas':('Hello, Gurugram.','At-home grooming is currently available in Sectors 69, 70 and 71. Message the team with your address to check coverage and visit availability. Travel and applicable taxes are confirmed before an appointment is agreed.'),
           'wellness':('Little reminders. A little peace of mind.','Ask about reminder support based on the dates your veterinarian provides. We do not create a universal vaccination schedule or administer vaccines as part of grooming.\nVet consultations, vaccination services, nutrition, walking, daycare, training, and boarding are planned. You can register interest without committing to a booking.'),
           'contact':('A real conversation starts here.','Call +91 74857 84578, email tailvic@gmail.com, or message Tailvic on WhatsApp. Appointment requests are welcome 24/7.\nInstagram: @tailvic. For a service concern, include your booking reference so the team can help.'),
           'faqs':('Good questions. Clear answers.','Everything you need to plan a care day.'),

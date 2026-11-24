@@ -64,8 +64,9 @@ def export():
             target = output / path.strip('/') / 'index.html'
             target.parent.mkdir(parents=True, exist_ok=True)
             target.write_text(html, encoding='utf-8')
+    shutil.rmtree(output / 'static', ignore_errors=True)
     for source in (ROOT / 'static').rglob('*'):
-        if source.is_file() and source.suffix.lower() in {'.css', '.js', '.json', '.webp', '.svg', '.ttf', '.woff', '.woff2', '.txt'}:
+        if source.is_file() and source.suffix.lower() in {'.css', '.js', '.json', '.webp', '.png', '.svg', '.ttf', '.woff', '.woff2', '.txt'}:
             target = output / 'static' / source.relative_to(ROOT / 'static')
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(source, target)

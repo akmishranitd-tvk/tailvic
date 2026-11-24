@@ -25,16 +25,9 @@ HOME_BENEFITS = [
 ]
 
 WHY_TAILVIC = [
- dict(icon='calendar',title='Easy Booking',copy='Request a time online or reserve an available published slot.'),
- dict(icon='certificate',title='Groomer Expertise',copy='Understand the assigned groomer’s training and relevant certifications.'),
- dict(icon='brush',title='Personal Finish',copy='Agree your coat-care priorities and the styling you have in mind.'),
- dict(icon='bottle',title='Premium Products',copy='Thoughtfully chosen grooming products, with suitability and sensitivities discussed for your pet.'),
- dict(icon='notes',title='Ongoing Support',copy='Take away aftercare notes and a clear way to ask follow-up questions.'),
-]
-
-GROOMING_STORIES = [
- dict(name='Milo',breed='Shih Tzu',title='A fringe with room to see.',copy='A tousled face becomes a neat, practical trim, keeping the same familiar character.',image='story-milo.webp',alt='Illustrative before-and-after styling concept of the same white-and-caramel Shih Tzu'),
- dict(name='Coco',breed='Miniature Poodle',title='Shape that keeps the curls.',copy='A soft rounded finish, with a coat style designed around everyday upkeep.',image='story-coco.webp',alt='Illustrative before-and-after styling concept of the same apricot Poodle'),
- dict(name='Luna',breed='Persian Cat',title='Smoother, still wonderfully fluffy.',copy='A gentle brush-out concept that retains the natural length of a Persian coat.',image='story-luna.webp',alt='Illustrative before-and-after coat-care concept of the same cream Persian cat'),
- dict(name='Bruno',breed='Cocker Spaniel',title='A lighter, tidier silhouette.',copy='Grown-out feathering becomes a practical spaniel trim, with shaped ears and a neat outline.',image='story-bruno.webp',alt='Illustrative before-and-after trimming concept of the same golden Cocker Spaniel'),
+ dict(icon='calendar',title='Friendly first chat',copy='Tell us about your pet and preferred timing before a visit is agreed.'),
+ dict(icon='heart',title='Comfort comes first',copy='Share what helps your pet settle, and make space for breaks.'),
+ dict(icon='brush',title='Care that fits',copy='Talk through coat care and the finish you have in mind.'),
+ dict(icon='home',title='In familiar surroundings',copy='At-home grooming keeps the visit close to the place they know.'),
+ dict(icon='notes',title='Clear agreed scope',copy='Discuss the service and complete quote with the team before confirming.'),
 ]

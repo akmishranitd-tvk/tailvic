@@ -59,6 +59,8 @@ class PreviewTests(unittest.TestCase):
                 self.assertNotIn(path.suffix, forbidden, str(path))
                 self.assertNotEqual(path.name, '.local-admin.txt')
         self.assertFalse((self.public / 'booking').exists())
+        for name in ('story-milo.webp','story-coco.webp','story-luna.webp','story-bruno.webp'):
+            self.assertFalse((self.public / 'static' / 'images' / name).exists())
         self.assertIn('data-demo-page="admin"', (self.public / 'admin/index.html').read_text(encoding='utf-8'))
         self.assertIn('data-demo-page="customer"', (self.public / 'account/dashboard/index.html').read_text(encoding='utf-8'))
 
