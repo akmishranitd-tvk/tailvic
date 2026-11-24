@@ -1,5 +1,5 @@
 {% from '_icons.html' import icon %}
 <section class="section why-tailvic" id="why-choose-us"><div class="container">
-  <div class="section-heading centered"><span class="eyebrow">WHY CHOOSE TAILVIC</span><h2>More thought in the details.<br><span class="serif">Less hassle in your day.</span></h2><p>One pet’s needs, one well-planned visit, and a team you can speak to.</p></div>
+  <div class="section-heading centered"><span class="eyebrow">A HAPPIER GROOMING DAY</span><h2>Good care in familiar surroundings.<br><span class="serif">With room for a little joy.</span></h2><p>One pet’s needs, one thoughtful visit, and a friendly conversation before we begin.</p></div>
   <div class="reasons-grid">{% for reason in why_tailvic %}<article><span class="reason-icon">{{ icon(reason.icon) }}</span><h3>{{ reason.title }}</h3><p>{{ reason['copy'] }}</p></article>{% endfor %}</div>
 </div></section>
