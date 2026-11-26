@@ -134,12 +134,12 @@ insert into public.package_tariffs (package_slug, species, size_key, coat_key, a
   ('signature-coat-spa','dog','medium','',269900),
   ('signature-coat-spa','dog','large','',329900),
   ('signature-coat-spa','dog','giant','',399900),
-  ('cat-coat-refresh','cat',null,'short',99900),
-  ('cat-coat-refresh','cat',null,'long',129900),
-  ('cat-hygiene-groom','cat',null,'short',139900),
-  ('cat-hygiene-groom','cat',null,'long',169900),
-  ('cat-full-coat-groom','cat',null,'short',189900),
-  ('cat-full-coat-groom','cat',null,'long',239900);
+  ('cat-coat-refresh','cat','','short',99900),
+  ('cat-coat-refresh','cat','','long',129900),
+  ('cat-hygiene-groom','cat','','short',139900),
+  ('cat-hygiene-groom','cat','','long',169900),
+  ('cat-full-coat-groom','cat','','short',189900),
+  ('cat-full-coat-groom','cat','','long',239900);
 
 create table public.slots (
   id uuid primary key default gen_random_uuid(),
