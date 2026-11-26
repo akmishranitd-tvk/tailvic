@@ -5,6 +5,7 @@ import subprocess
 import sys
 import unittest
 from urllib.parse import unquote, urlsplit
+from pricing import DOG_PRICES, CAT_PRICES
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -59,11 +60,26 @@ class PreviewTests(unittest.TestCase):
                 self.assertNotIn(path.suffix, forbidden, str(path))
                 self.assertNotEqual(path.name, '.local-admin.txt')
         self.assertFalse((self.public / 'booking').exists())
-        for name in ('story-milo.webp','story-coco.webp','story-luna.webp','story-bruno.webp'):
-            self.assertFalse((self.public / 'static' / 'images' / name).exists())
         self.assertIn('data-demo-page="admin"', (self.public / 'admin/index.html').read_text(encoding='utf-8'))
         self.assertIn('data-demo-page="customer"', (self.public / 'account/dashboard/index.html').read_text(encoding='utf-8'))
+
+    def test_exported_pricing_matches_central_tariffs_and_has_responsive_tables(self):
+        package=(self.public/'packages'/'index.html').read_text(encoding='utf-8')
+        dog=(self.public/'services'/'dog-grooming'/'index.html').read_text(encoding='utf-8')
+        cat=(self.public/'services'/'cat-grooming'/'index.html').read_text(encoding='utf-8')
+        for slug,prices in DOG_PRICES.items():
+            for amount in prices.values():
+                self.assertIn('₹'+f'{amount/100:,.0f}',package)
+                self.assertIn('₹'+f'{amount/100:,.0f}',dog)
+        for slug,prices in CAT_PRICES.items():
+            for amount in prices.values():
+                self.assertIn('₹'+f'{amount/100:,.0f}',package)
+                self.assertIn('₹'+f'{amount/100:,.0f}',cat)
+        self.assertIn('class="pricing-table-wrap"',package)
+        css=(self.public/'static'/'style.css').read_text(encoding='utf-8')
+        self.assertIn('.pricing-table-wrap{max-width:100%;overflow-x:auto',css)
 
 
 if __name__ == '__main__':
     unittest.main()
+

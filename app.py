@@ -17,6 +17,7 @@ from flask import Flask, abort, g, jsonify, make_response, redirect, render_temp
 from werkzeug.security import check_password_hash, generate_password_hash
 from content import SERVICES, ARTICLES, BREEDS, FAQS, POLICIES, SIZE_GUIDES, COPY_BASELINES
 from homepage_content import BREED_VISUALS, PILLARS, HOME_BENEFITS, WHY_TAILVIC
+from pricing import decorate_service, price_for, pricing_tables
 
 ROOT = Path(__file__).parent
 IST = timezone(timedelta(hours=5, minutes=30))
@@ -77,6 +78,14 @@ def create_app(test_config=None):
                         changed=True
                 if changed:
                     db().execute(f'UPDATE {table} SET data=? WHERE slug=?',(json.dumps(current),item['slug']))
+        # Strip legacy single-price fields from service records. Current tariffs
+        # live only in pricing.py; booked quote snapshots are stored separately.
+        for row in db().execute('SELECT slug,data FROM services').fetchall():
+            service=json.loads(row['data'])
+            if service.get('price') is not None or service.get('reference') is not None:
+                service['price']=None
+                service['reference']=None
+                db().execute('UPDATE services SET data=? WHERE slug=?',(json.dumps(service),row['slug']))
         for key,value in {'upi':'7845475769@upi','travel_note':'Travel and applicable taxes are confirmed in your complete quote.','coverage':'Gurugram · Sectors 69, 70 and 71'}.items():
             db().execute('INSERT OR IGNORE INTO settings VALUES (?,?)',(key,value))
     with app.app_context():
@@ -89,6 +98,12 @@ def create_app(test_config=None):
 
     def rows(table):
         return [json.loads(r['data']) for r in db().execute(f'SELECT data FROM {table} ORDER BY rowid')]
+
+    def service_catalog():
+        # The legacy cat-care row remains in existing SQLite files for old links,
+        # but only the current centrally-priced menu is published to customers.
+        current={item['slug'] for item in SERVICES}
+        return [decorate_service(s) for s in rows('services') if s['slug'] in current]
 
     def setting(key):
         row=db().execute('SELECT value FROM settings WHERE key=?',(key,)).fetchone()
@@ -154,7 +169,7 @@ def create_app(test_config=None):
 
     @app.context_processor
     def context():
-        return dict(current_user=user(),csrf=session.get('csrf'),services=rows('services'),articles=rows('articles'),faqs=FAQS,breeds=BREEDS,year=datetime.now(IST).year,coverage=setting('coverage'),breed_visuals=BREED_VISUALS,pillars=PILLARS,home_benefits=HOME_BENEFITS,why_tailvic=WHY_TAILVIC)
+        return dict(current_user=user(),csrf=session.get('csrf'),services=service_catalog(),articles=rows('articles'),faqs=FAQS,breeds=BREEDS,year=datetime.now(IST).year,coverage=setting('coverage'),breed_visuals=BREED_VISUALS,pillars=PILLARS,home_benefits=HOME_BENEFITS,why_tailvic=WHY_TAILVIC)
 
     @app.template_filter('money')
     def money(paise):
@@ -172,12 +187,12 @@ def create_app(test_config=None):
     @app.route('/packages/')
     @app.route('/services/<slug>/')
     def service_page(slug=None):
-        ss=rows('services')
+        ss=service_catalog()
         species='dog' if slug=='dog-grooming' else 'cat' if slug=='cat-grooming' else None
         chosen=next((s for s in ss if s['slug']==slug),None)
         if slug and not chosen and not species:
             abort(404)
-        return render_template('services.html',title=(chosen['name'] if chosen else ('Cat grooming' if species=='cat' else 'Dog grooming' if species else 'Grooming & pricing'))+' in Gurgaon | Tailvic',chosen=chosen,species=species)
+        return render_template('services.html',title=(chosen['name'] if chosen else ('Cat grooming' if species=='cat' else 'Dog grooming' if species else 'Grooming & pricing'))+' in Gurgaon | Tailvic',chosen=chosen,species=species,pricing=pricing_tables())
 
     @app.route('/care-guides/')
     @app.route('/care-guides/<slug>/')
@@ -313,13 +328,15 @@ def create_app(test_config=None):
         if request.method=='POST':
             limited('booking',20,3600)
             f={k:request.form.get(k,'').strip() for k in ('name','email','phone','pet_name','species','size','coat','service','address','pin','notes','preferred')}
-            svc=next((s for s in rows('services') if s['slug']==f['service']),None)
+            svc=next((s for s in service_catalog() if s['slug']==f['service']),None)
             if any(not f[k] for k in ('name','email','phone','pet_name','address','pin')) or any(len(v)>1500 for v in f.values()) or not re.fullmatch(r'[^\s@]+@[^\s@]+\.[^\s@]+',f['email']) or not re.fullmatch(r'\d{6}',f['pin']) or not 10<=len(re.sub(r'\D','',f['phone']))<=15 or not svc or f['species'] not in ('dog','cat') or f['size'] not in ('small','medium','large','giant') or f['coat'] not in ('short','long','double','curly') or not request.form.get('consent'):
                 error='Please complete the required details, valid contact information, and booking consent.'
             elif svc['species'] not in ('both',f['species']):
                 error='Please choose a service suited to your dog or cat.'
             elif f['size'] not in {option['value'] for option in SIZE_GUIDES[f['species']]}:
                 error='Please choose a size category available for your dog or cat.'
+            elif f['species']=='cat' and f['coat'] not in ('short','long'):
+                error='Please choose short or long coat for cat grooming.'
             else:
                 slotid=request.form.get('slot_id') if request.form.get('mode')=='slot' else None
                 if request.form.get('mode')=='slot' and not slotid:
@@ -340,7 +357,8 @@ def create_app(test_config=None):
                         if slotid and not any(str(s['id'])==slotid for s in available()):
                             raise ValueError('That slot was just reserved. Choose another time or request an appointment.')
                         u=user()
-                        db().execute('INSERT INTO bookings(id,user_id,name,email,phone,pet_name,species,size,coat,service,address,pin,notes,preferred,slot_id,status,base,reminder,created) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',(bid,u['id'] if u else None,f['name'],f['email'],f['phone'],f['pet_name'],f['species'],f['size'],f['coat'],f['service'],f['address'],f['pin'],f['notes'],f['preferred'],slotid,'reserved' if slotid else 'requested',svc['price'],int(bool(request.form.get('reminder'))),now()))
+                        base=price_for(f['species'],svc['slug'],size=f['size'],coat=f['coat'])
+                        db().execute('INSERT INTO bookings(id,user_id,name,email,phone,pet_name,species,size,coat,service,address,pin,notes,preferred,slot_id,status,base,reminder,created) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',(bid,u['id'] if u else None,f['name'],f['email'],f['phone'],f['pet_name'],f['species'],f['size'],f['coat'],f['service'],f['address'],f['pin'],f['notes'],f['preferred'],slotid,'reserved' if slotid else 'requested',base,int(bool(request.form.get('reminder'))),now()))
                         event('enquiry_received','/book/')
                         audit('booking_created',bid)
                         db().execute('COMMIT')
@@ -349,7 +367,7 @@ def create_app(test_config=None):
                     except (sqlite3.IntegrityError,ValueError) as exc:
                         db().execute('ROLLBACK')
                         error=str(exc) if isinstance(exc,ValueError) else 'That slot was just reserved. Please choose another.'
-        all_services=rows('services')
+        all_services=service_catalog()
         selected=request.form.get('service') or request.args.get('service','')
         selected_service=next((s for s in all_services if s['slug']==selected),None)
         pet_species=request.form.get('species') if request.form.get('species') in SIZE_GUIDES else ('cat' if selected_service and selected_service['species']=='cat' else 'dog')
@@ -425,12 +443,10 @@ def create_app(test_config=None):
                     s=next((s for s in rows('services') if s['slug']==slug),None)
                     if not s:
                         raise ValueError('Unknown service.')
-                    name=request.form['name'].strip()
-                    price=request.form['price'].strip()
-                    if not name or len(name)>100 or (price and not re.fullmatch(r'\d{1,6}(\.\d{1,2})?',price)):
-                        raise ValueError('Enter a valid service name and price.')
-                    s.update(name=name,description=request.form['description'][:1000],duration=request.form['duration'][:100],includes=[x.strip() for x in request.form['includes'].splitlines() if x.strip()][:12],price=round(float(price)*100) if price else None)
-                    s['reference']=None
+                    name=s['name']
+                    if not name or len(name)>100:
+                        raise ValueError('Enter a valid service name.')
+                    s.update(name=name,description=request.form['description'][:1000],duration=request.form['duration'][:100],includes=[x.strip() for x in request.form['includes'].splitlines() if x.strip()][:12])
                     db().execute('UPDATE services SET data=? WHERE slug=?',(json.dumps(s),slug))
                     audit('service_edited',slug)
                 elif action=='application_status':
@@ -527,7 +543,7 @@ def create_app(test_config=None):
         bookings=db().execute('SELECT b.*,s.starts FROM bookings b LEFT JOIN slots s ON b.slot_id=s.id ORDER BY b.created DESC').fetchall()
         metrics={r['event']:r['n'] for r in db().execute('SELECT event,COUNT(*) n FROM events GROUP BY event')}
         totals=dict(db().execute("SELECT COUNT(*) appointments,COALESCE(SUM(CASE WHEN payment='verified' THEN total ELSE 0 END),0) collected FROM bookings").fetchone())
-        return render_template('admin.html',title='Tailvic studio | Admin',error=error,bookings=bookings,metrics=metrics,totals=totals,all_slots=db().execute('SELECT * FROM slots WHERE active=1 AND starts>? ORDER BY starts',(now(),)).fetchall(),applications=db().execute('SELECT * FROM applications ORDER BY created DESC,id DESC').fetchall())
+        return render_template('admin.html',title='Tailvic studio | Admin',error=error,bookings=bookings,services=service_catalog(),metrics=metrics,totals=totals,all_slots=db().execute('SELECT * FROM slots WHERE active=1 AND starts>? ORDER BY starts',(now(),)).fetchall(),applications=db().execute('SELECT * FROM applications ORDER BY created DESC,id DESC').fetchall())
 
     @app.get('/robots.txt')
     def robots():
@@ -569,3 +585,4 @@ if __name__=='__main__':
                 print('Admin already exists; credentials unchanged.')
     else:
         app.run(host='127.0.0.1',port=args.port,debug=False)
+

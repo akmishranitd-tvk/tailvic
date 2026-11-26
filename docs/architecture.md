@@ -41,6 +41,7 @@ separate intentional task, not part of routine content edits.
 | --- | --- |
 | `app.py` | Build-time Flask application factory and routes; undeployed backend code |
 | `content.py` | Seed service menu, articles, policy and supporting content |
+| `pricing.py` | Single approved grooming tariff and size/coat lookup |
 | `homepage_content.py` | Homepage section data and breed/story visuals |
 | `templates/base.html` | Shared page shell, navigation and footer |
 | `templates/home.html`, `_home_*.html` | Homepage and reusable homepage sections |
@@ -78,3 +79,4 @@ Secure accounts or saved bookings require a backend, persistent storage and
 server-side authorization. Define that architecture and acceptance criteria
 before replacing the current browser-only roles. Avoid accidental framework or
 hosting changes just to modify a page.
+
