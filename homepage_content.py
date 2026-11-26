@@ -17,11 +17,9 @@ PILLARS = [
 ]
 
 HOME_BENEFITS = [
- dict(image='benefit-doorstep.webp',alt='Groomer arriving at a pet parent’s front door',title='Doorstep Care',copy='No drive, drop-off, or pickup. Your groomer comes to your door.'),
- dict(image='benefit-time.webp',alt='Pet parent relaxing with a Labrador on a balcony',title='More Time',copy='Plan a visit around your routine instead of another round trip.'),
- dict(image='benefit-comfort.webp',alt='Cat resting on a cushion in familiar surroundings',title='Home Comfort',copy='Their own space, familiar sounds, and their favourite people nearby.'),
- dict(image='benefit-attention.webp',alt='A groomer gently brushing a Shih Tzu',title='Personal Attention',copy='Time to notice their preferences and adapt the agreed grooming plan.'),
- dict(image='benefit-involved.webp',alt='Pet parent discussing a brush with their groomer',title='Stay Involved',copy='Discuss products, ask questions, and understand the work as it happens.'),
+ dict(image='benefit-doorstep.webp',alt='A groomer arriving at a pet parent’s front door',title='At your door',copy='No drop-off or pickup journey. Grooming happens at your home.'),
+ dict(image='benefit-comfort.webp',alt='A cat resting on a cushion in familiar surroundings',title='Familiar surroundings',copy='Your pet stays close to familiar sounds, spaces, and people.'),
+ dict(image='benefit-attention.webp',alt='A groomer gently brushing a dog',title='A plan you discuss',copy='Talk through coat care, preferences, and the agreed scope before the visit.'),
 ]
 
 WHY_TAILVIC = [
