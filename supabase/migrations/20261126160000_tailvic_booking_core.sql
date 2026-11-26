@@ -101,14 +101,14 @@ create trigger addresses_touch_updated_at before update on public.addresses
 create table public.package_tariffs (
   package_slug text not null,
   species text not null check (species in ('dog', 'cat')),
-  size_key text,
-  coat_key text,
+  size_key text not null default '',
+  coat_key text not null default '',
   amount_paise integer not null check (amount_paise > 0),
   primary key (package_slug, species, size_key, coat_key),
   check (
-    (species = 'dog' and size_key in ('small', 'medium', 'large', 'giant') and coat_key is null)
+    (species = 'dog' and size_key in ('small', 'medium', 'large', 'giant') and coat_key = '')
     or
-    (species = 'cat' and coat_key in ('short', 'long') and size_key is null)
+    (species = 'cat' and coat_key in ('short', 'long') and size_key = '')
   )
 );
 alter table public.package_tariffs enable row level security;
@@ -238,7 +238,8 @@ begin
     from public.package_tariffs
     where package_slug = new.service_slug
       and species = new.species
-      and ((new.species = 'dog' and size_key = new.size_key) or (new.species = 'cat' and coat_key = new.coat_key));
+      and ((new.species = 'dog' and size_key = new.size_key and coat_key = '')
+        or (new.species = 'cat' and size_key = '' and coat_key = new.coat_key));
     if not found then
       raise exception 'The selected package and size or coat are not in the approved tariff.';
     end if;
@@ -263,6 +264,7 @@ revoke all on public.profiles, public.pets, public.addresses, public.slots, publ
 grant select, update on public.profiles to authenticated;
 grant select, insert, update, delete on public.pets, public.addresses to authenticated;
 grant select on public.slots to anon, authenticated;
+grant insert, update, delete on public.slots to authenticated;
 grant select, insert, update on public.bookings to authenticated;
 
 create policy profiles_read_own on public.profiles
