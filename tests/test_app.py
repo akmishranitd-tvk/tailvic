@@ -290,7 +290,7 @@ class TailvicTests(unittest.TestCase):
 
     def test_homepage_refresh_has_no_fabricated_profiles_or_customer_stories(self):
         page=self.customer.get('/').get_data(as_text=True)
-        for text in ('WHAT WE PROMISE TO DELIVER','A HAPPIER GROOMING DAY','Gurugram Sectors 69, 70 & 71','At-home grooming is currently available in Sectors 69, 70 and 71'):
+        for text in ('A SIMPLE ENQUIRY','Gurugram Sectors 69, 70 & 71','At-home grooming is currently available in Sectors 69, 70 and 71'):
             self.assertIn(text,page)
         for text in ('class="story-card"','Aanya · Grooming stylist','Illustrative team profile','These are not customer results','Book Now','reserve an available published slot'):
             self.assertNotIn(text,page)
@@ -317,21 +317,20 @@ class TailvicTests(unittest.TestCase):
         for benefit in HOME_BENEFITS:
             self.assertLessEqual(len(benefit['title'].split()),2)
             self.assertIn('images/'+benefit['image'],page)
-        for reason in WHY_TAILVIC:
-            self.assertLessEqual(len(reason['title'].split()),3)
-        for item in HOME_BENEFITS+WHY_TAILVIC:
+        for item in HOME_BENEFITS:
             self.assertIn(item['copy'],page)
-        section=page.split('COAT KNOWLEDGE',1)[1].split('</section>',1)[0]
-        self.assertIn('class="breed-chips"',section)
-        self.assertNotIn('<img',section)
-        self.assertEqual(section.count('/care-guides/breeds/'),7)
+        self.assertNotIn('class="breed-section"',page)
+        self.assertNotIn('wellness-section',page)
+        self.assertNotIn('future-section',page)
+        self.assertNotIn('membership-section',page)
+        self.assertIn('Grooming advice',page)
         checklist=self.customer.get('/care-guides/prepare-for-home-grooming/').get_data(as_text=True)
         self.assertIn('Your Tailvic groomer comes to your home.',checklist)
         self.assertNotIn('Before your visit',checklist)
 
     def test_journal_images_are_distinct_and_match_article_pages(self):
         home=self.customer.get('/').get_data(as_text=True)
-        journal=home.split('The Tailvic Blogs',1)[1].split('</section>',1)[0]
+        journal=home.split('GROOMING ADVICE',1)[1].split('</section>',1)[0]
         images=re.findall(r'<img[^>]+src="([^"]+)"',journal)
         self.assertEqual(len(images),3)
         self.assertEqual(len(set(images)),3)
@@ -353,3 +352,4 @@ class TailvicTests(unittest.TestCase):
 
 if __name__=='__main__':
     unittest.main()
+
