@@ -355,7 +355,7 @@ class TailvicTests(unittest.TestCase):
         home=self.customer.get('/').get_data(as_text=True)
         self.assertIn('Tailvic<span',home)
         self.assertNotIn('<span>tailvic',home)
-        self.assertIn('/careers/',home)
+        self.assertNotIn('/careers/',home)
 
     def test_homepage_refresh_has_no_fabricated_profiles_or_customer_stories(self):
         page=self.customer.get('/').get_data(as_text=True)
@@ -381,7 +381,7 @@ class TailvicTests(unittest.TestCase):
         self.assertNotIn('What changes when the appointment comes to you?',page)
         self.assertNotIn('Home grooming can be a good fit for many pets.',page)
         self.assertNotIn('your Gurgaon locality',page)
-        self.assertEqual(len(HOME_BENEFITS),5)
+        self.assertEqual(len(HOME_BENEFITS),3)
         self.assertEqual(len(WHY_TAILVIC),5)
         for benefit in HOME_BENEFITS:
             self.assertLessEqual(len(benefit['title'].split()),2)
@@ -392,20 +392,24 @@ class TailvicTests(unittest.TestCase):
         self.assertNotIn('wellness-section',page)
         self.assertNotIn('future-section',page)
         self.assertNotIn('membership-section',page)
-        self.assertIn('GROOMING ADVICE',page)
+        self.assertNotIn('GROOMING ADVICE',page)
+        self.assertIn('/care-guides/',page)
         checklist=self.customer.get('/care-guides/prepare-for-home-grooming/').get_data(as_text=True)
         self.assertIn('Your Tailvic groomer comes to your home.',checklist)
         self.assertNotIn('Before your visit',checklist)
 
-    def test_journal_images_are_distinct_and_match_article_pages(self):
+    def test_homepage_keeps_guides_linked_without_repeating_article_cards(self):
         home=self.customer.get('/').get_data(as_text=True)
-        journal=home.split('GROOMING ADVICE',1)[1].split('</section>',1)[0]
-        images=re.findall(r'<img[^>]+src="([^"]+)"',journal)
-        self.assertEqual(len(images),3)
-        self.assertEqual(len(set(images)),3)
-        for slug,image in zip(('choosing-a-dog-brush','introducing-your-cat-to-grooming','prepare-for-home-grooming'),images):
+        self.assertIn('href="/care-guides/"',home)
+        self.assertNotIn('GROOMING ADVICE',home)
+        self.assertNotIn('class="article-card"',home)
+        images=[]
+        for slug in ('choosing-a-dog-brush','introducing-your-cat-to-grooming','prepare-for-home-grooming'):
             article=self.customer.get('/care-guides/'+slug+'/').get_data(as_text=True)
-            self.assertIn('src="'+image+'"',article)
+            match=re.search(r'<img class="reading-image" src="([^"]+)"',article)
+            self.assertIsNotNone(match)
+            images.append(match.group(1))
+        self.assertEqual(len(set(images)),3)
 
     def test_breed_guides_use_individual_photography(self):
         from homepage_content import BREED_VISUALS
