@@ -262,6 +262,7 @@ alter table public.bookings enable row level security;
 
 revoke all on public.profiles, public.pets, public.addresses, public.slots, public.bookings from anon, authenticated;
 grant select, update on public.profiles to authenticated;
+grant select on public.pets to anon;
 grant select, insert, update, delete on public.pets, public.addresses to authenticated;
 grant select on public.slots to anon, authenticated;
 grant insert, update, delete on public.slots to authenticated;
