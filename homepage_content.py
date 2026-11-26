@@ -17,7 +17,7 @@ PILLARS = [
 ]
 
 HOME_BENEFITS = [
- dict(image='benefit-doorstep.webp',alt='A groomer arriving at a pet parent’s front door',title='At your door',copy='No drop-off or pickup journey. Grooming happens at your home.'),
+ dict(image='benefit-doorstep.webp',alt='A groomer arriving at a pet parent’s front door',title='At home',copy='No drop-off or pickup journey. Grooming happens at your home.'),
  dict(image='benefit-comfort.webp',alt='A cat resting on a cushion in familiar surroundings',title='Familiar surroundings',copy='Your pet stays close to familiar sounds, spaces, and people.'),
  dict(image='benefit-attention.webp',alt='A groomer gently brushing a dog',title='Discussed plan',copy='Talk through coat care, preferences, and the agreed scope before the visit.'),
 ]
