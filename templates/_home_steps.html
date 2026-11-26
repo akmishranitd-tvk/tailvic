@@ -1,8 +1,9 @@
 {% from '_icons.html' import icon %}
 <section class="section appointment-journey" id="how-it-works"><div class="container">
-  <div class="section-heading centered"><span class="eyebrow">FROM FIRST HELLO TO FRESHLY GROOMED</span><h2>Your appointment,<br><span class="serif">step by step.</span></h2></div>
-  <div class="journey-grid">{% for number,symbol,title,copy in [('01','pet','Tell us about your pet','Share their coat, size, handling preferences, and your locality.'),('02','calendar','Review the details','Choose a published slot or request a time. Confirm your complete quote.'),('03','home','Welcome your groomer','Get your preparation checklist and groomer details before they arrive at your home.'),('04','notes','Keep the aftercare notes','Enjoy a fresher coat and a few helpful aftercare notes.')] %}
+  <div class="section-heading centered"><span class="eyebrow">A SIMPLE ENQUIRY</span><h2>From first message<br><span class="serif">to a care plan.</span></h2><p>Tailvic arranges visits directly with you. There is no online calendar or instant booking.</p></div>
+  <div class="journey-grid">{% for number,symbol,title,copy in [('01','pet','Tell us about your pet','Share their species, coat, size, handling preferences, and your sector.'),('02','calendar','Review the plan and quote','The team checks coverage, discusses suitable care, timing and the complete quote with you.'),('03','home','Confirm before the visit','Once you agree the details, the team confirms the visit and preparation needs.')] %}
     <article><div class="journey-top"><span class="journey-number">{{ number }}</span><span class="journey-icon">{{ icon(symbol) }}</span></div><h3>{{ title }}</h3><p>{{ copy }}</p><span class="journey-arrow" aria-hidden="true">↗</span></article>
   {% endfor %}</div>
   <div class="center"><a class="button" href="https://wa.me/917485784578?text=Hi%20Tailvic%2C%20I%27d%20like%20to%20ask%20about%20a%20grooming%20visit." data-track="whatsapp_click">Ask us about a visit ↗</a></div>
 </div></section>
+
