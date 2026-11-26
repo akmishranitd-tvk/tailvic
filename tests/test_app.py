@@ -323,7 +323,7 @@ class TailvicTests(unittest.TestCase):
         self.assertNotIn('wellness-section',page)
         self.assertNotIn('future-section',page)
         self.assertNotIn('membership-section',page)
-        self.assertIn('Grooming advice',page)
+        self.assertIn('GROOMING ADVICE',page)
         checklist=self.customer.get('/care-guides/prepare-for-home-grooming/').get_data(as_text=True)
         self.assertIn('Your Tailvic groomer comes to your home.',checklist)
         self.assertNotIn('Before your visit',checklist)
