@@ -215,6 +215,7 @@ class TailvicTests(unittest.TestCase):
                 with self.app.app_context():
                     row=self.app.get_db().execute('SELECT base FROM bookings WHERE id=?',(bid,)).fetchone()
                     self.assertEqual(row['base'],expected)
+                    self.app.get_db().execute('DELETE FROM limits')
         historical=self.request_booking()
         with self.app.app_context():
             d=self.app.get_db()
