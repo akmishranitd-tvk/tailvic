@@ -9,6 +9,7 @@ from concurrent.futures import ThreadPoolExecutor
 from werkzeug.security import generate_password_hash
 from app import create_app, IST
 from content import ARTICLES
+from pricing import DOG_PRICES, CAT_PRICES, price_for
 from html.parser import HTMLParser
 import json
 
@@ -69,7 +70,9 @@ class TailvicTests(unittest.TestCase):
         self.post(self.admin,'/account/',dict(action='login',email='owner@example.test',password='test-owner-password'))
 
     def details(self,**extra):
-        return dict(name='Pet parent',email='parent@example.test',phone='9876543210',pet_name='Milo',species='dog',size='medium',coat='double',service='bath-brush',address='Gurgaon test address',pin='122101',notes='Gentle introduction please',preferred=(datetime.now(IST)+timedelta(days=3)).strftime('%Y-%m-%dT%H:%M'),consent='on',mode='request',**extra)
+        data=dict(name='Pet parent',email='parent@example.test',phone='9876543210',pet_name='Milo',species='dog',size='medium',coat='double',service='bath-brush',address='Gurgaon test address',pin='122101',notes='Gentle introduction please',preferred=(datetime.now(IST)+timedelta(days=3)).strftime('%Y-%m-%dT%H:%M'),consent='on',mode='request')
+        data.update(extra)
+        return data
 
     def request_booking(self,client=None):
         response=self.post(client or self.customer,'/book/',self.details())
@@ -104,12 +107,12 @@ class TailvicTests(unittest.TestCase):
         bid=self.request_booking()
         self.assertNotIn('upi://pay?',self.customer.get('/booking/'+bid+'/').get_data(as_text=True))
         self.assertEqual(self.post(self.customer,'/booking/'+bid+'/',dict(action='accept')).status_code,400)
-        quote=dict(action='quote',bid=bid,base='719.10',travel='100',tax='147.44',confirmed_starts=self.details()['preferred'])
+        quote=dict(action='quote',bid=bid,base='999',travel='100',tax='147.44',confirmed_starts=self.details()['preferred'])
         self.assertEqual(self.post(self.admin,'/admin/',quote).status_code,302)
         self.assertEqual(self.post(self.customer,'/booking/'+bid+'/',dict(action='accept')).status_code,302)
         page=self.customer.get('/booking/'+bid+'/').get_data(as_text=True)
         self.assertIn('7845475769@upi',page)
-        self.assertIn('966.54',page)
+        self.assertIn('1,246.44',page)
         qr=self.customer.get('/booking/'+bid+'/payment-qr.svg')
         self.assertEqual(qr.status_code,200)
         self.assertIn(b'<svg',qr.data)
@@ -152,16 +155,81 @@ class TailvicTests(unittest.TestCase):
     def test_request_quotes_cannot_overlap(self):
         one=self.request_booking()
         two=self.request_booking(self.other)
-        q=dict(action='quote',base='719.10',travel='100',tax='0',confirmed_starts=self.details()['preferred'])
+        q=dict(action='quote',base='999',travel='100',tax='0',confirmed_starts=self.details()['preferred'])
         self.assertEqual(self.post(self.admin,'/admin/',dict(q,bid=one)).status_code,302)
         r=self.post(self.admin,'/admin/',dict(q,bid=two))
         self.assertEqual(r.status_code,200)
         self.assertIn('already reserved',r.get_data(as_text=True))
 
+    def test_all_approved_package_prices_are_selected_by_size_or_coat(self):
+        sizes=('small','medium','large','giant')
+        dog_expected={
+            'bath-brush':(99900,119900,149900,189900),
+            'hygiene-groom':(129900,159900,199900,249900),
+            'full-groom':(179900,219900,269900,329900),
+            'signature-coat-spa':(229900,269900,329900,399900),
+        }
+        for service,values in dog_expected.items():
+            for size,value in zip(sizes,values):
+                with self.subTest(species='dog',service=service,size=size):
+                    self.assertEqual(price_for('dog',service,size=size),value)
+        cat_expected={
+            'cat-coat-refresh':(99900,129900),
+            'cat-hygiene-groom':(139900,169900),
+            'cat-full-coat-groom':(189900,239900),
+        }
+        for service,values in cat_expected.items():
+            for coat,value in zip(('short','long'),values):
+                with self.subTest(species='cat',service=service,coat=coat):
+                    self.assertEqual(price_for('cat',service,coat=coat),value)
+        self.assertIsNone(price_for('dog','express-care',size='small'))
+        self.assertIsNone(price_for('cat','express-care',coat='short'))
+
+    def test_package_prices_are_published_on_pricing_and_category_pages(self):
+        pages={
+            '/packages/':(*DOG_PRICES.values(),*CAT_PRICES.values()),
+            '/services/':(*DOG_PRICES.values(),*CAT_PRICES.values()),
+            '/services/dog-grooming/':tuple(DOG_PRICES.values()),
+            '/services/cat-grooming/':tuple(CAT_PRICES.values()),
+        }
+        for path,matrices in pages.items():
+            with self.subTest(path=path):
+                page=self.customer.get(path).get_data(as_text=True)
+                for prices in matrices:
+                    for amount in prices.values():
+                        self.assertIn('₹'+f'{amount/100:,.0f}',page)
+        for path in ('/services/','/packages/'):
+            page=self.customer.get(path).get_data(as_text=True)
+            for package in ('Bath &amp; Brush','Hygiene Groom','Full Style Groom','Signature Coat Spa','Coat Refresh','Full Coat Groom'):
+                self.assertIn(package,page)
+
+    def test_booking_snapshots_price_for_new_requests_and_preserves_existing_quote(self):
+        cases=[('dog',service,size,'short',price) for service,values in DOG_PRICES.items() for size,price in values.items()]
+        cases += [('cat',service,'medium',coat,price) for service,values in CAT_PRICES.items() for coat,price in values.items()]
+        cases += [('dog','express-care','small','short',None)]
+        for species,service,size,coat,expected in cases:
+            with self.subTest(species=species,service=service,size=size,coat=coat):
+                response=self.post(self.customer,'/book/',self.details(species=species,service=service,size=size,coat=coat))
+                self.assertEqual(response.status_code,302)
+                bid=response.location.split('/')[-2]
+                with self.app.app_context():
+                    row=self.app.get_db().execute('SELECT base FROM bookings WHERE id=?',(bid,)).fetchone()
+                    self.assertEqual(row['base'],expected)
+                    self.app.get_db().execute('DELETE FROM limits')
+        historical=self.request_booking()
+        with self.app.app_context():
+            d=self.app.get_db()
+            d.execute("UPDATE bookings SET status='confirmed',base=88800,total=88800 WHERE id=?",(historical,))
+            self.app.init_db()
+            row=d.execute('SELECT status,base,total FROM bookings WHERE id=?',(historical,)).fetchone()
+            self.assertEqual(tuple(row),('confirmed',88800,88800))
+
     def test_editing_and_xss_escaping(self):
         self.post(self.admin,'/admin/',dict(action='service',slug='bath-brush',name='Fresh Bath',price='800',description='<script>alert(1)</script>',duration='60 minutes',includes='Bath\nBrush'))
         page=self.customer.get('/services/').get_data(as_text=True)
-        self.assertIn('Fresh Bath',page)
+        self.assertIn('Bath &amp; Brush',page)
+        self.assertIn('₹999',page)
+        self.assertNotIn('₹800',page)
         self.assertIn('&lt;script&gt;',page)
         self.assertNotIn('<script>alert(1)</script>',page)
         self.post(self.admin,'/admin/',dict(action='article',slug='choose-a-grooming-package',title='Updated guide',summary='A useful summary',body='Original text\nAnother paragraph'))
@@ -208,14 +276,14 @@ class TailvicTests(unittest.TestCase):
         self.assertEqual([v for v,label in dog['size']],['small','medium','large','giant'])
         self.assertIn('Chihuahua',dog['size'][0][1])
         self.assertIn('Great Dane',dog['size'][-1][1])
-        self.assertEqual([v for v,label in dog['service']],['bath-brush','full-groom','express-care'])
-        cat=SelectOptions(self.customer.get('/book/?service=cat-care').get_data(as_text=True)).options
+        self.assertEqual([v for v,label in dog['service']],['bath-brush','hygiene-groom','full-groom','signature-coat-spa','express-care'])
+        cat=SelectOptions(self.customer.get('/book/?service=cat-coat-refresh').get_data(as_text=True)).options
         self.assertEqual([v for v,label in cat['size']],['small','medium','large'])
         self.assertIn('Maine Coon',cat['size'][-1][1])
-        self.assertEqual([v for v,label in cat['service']],['cat-care','express-care'])
+        self.assertEqual([v for v,label in cat['service']],['cat-coat-refresh','cat-hygiene-groom','cat-full-coat-groom','express-care'])
 
     def test_cat_giant_category_is_rejected_server_side(self):
-        d=self.details();d.update(species='cat',service='cat-care',size='giant')
+        d=self.details();d.update(species='cat',service='cat-coat-refresh',size='giant')
         r=self.post(self.customer,'/book/',d)
         self.assertEqual(r.status_code,200)
         self.assertIn('size category available',r.get_data(as_text=True))
@@ -277,7 +345,8 @@ class TailvicTests(unittest.TestCase):
             self.assertEqual(updated['body'],'Owner-written article')
             updated=json.loads(d.execute("SELECT data FROM services WHERE slug='bath-brush'").fetchone()['data'])
             self.assertEqual(updated['description'],'Owner-written service')
-            self.assertEqual(updated['price'],90000)
+            self.assertIsNone(updated['price'])
+            self.assertIsNone(updated['reference'])
             self.assertEqual(d.execute('SELECT COUNT(*) FROM articles').fetchone()[0],5)
         for slug in ('choosing-a-dog-brush','introducing-your-cat-to-grooming'):
             page=self.customer.get('/care-guides/'+slug+'/').get_data(as_text=True)

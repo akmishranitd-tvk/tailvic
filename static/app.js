@@ -20,15 +20,16 @@ if(storyToggle&&storyMarquee){
 }
 function filterPet(pet){$$('[data-pet-filter]').forEach(b=>{const on=b.dataset.petFilter===pet;b.classList.toggle('active',on);b.setAttribute('aria-pressed',String(on));});$$('#service-grid [data-species]').forEach(card=>{card.hidden=card.dataset.species!==pet&&card.dataset.species!=='both';});}
 $$('[data-pet-filter]').forEach(b=>b.addEventListener('click',()=>filterPet(b.dataset.petFilter)));if($('#service-grid'))filterPet('dog');
-const service=$('#service-select'),species=$('#species'),size=$('#size-select');
+const service=$('#service-select'),species=$('#species'),size=$('#size-select'),coat=$('#coat-select');
 const catalog=$('#service-catalog')?[...$('#service-catalog').content.querySelectorAll('option')]:[];
 const sizeGuides=$('#booking-form')?JSON.parse($('#booking-form').dataset.sizeGuides):{};
 const savedServices={},savedSizes={};let previousSpecies=species?.value;
-function estimate(){if(!service)return;const o=service.selectedOptions[0];const p=o?.dataset.price;$('#service-estimate').textContent=p?new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR'}).format(Number(p)/100):'Quote on request';$('#service-duration').textContent=o?.dataset.duration||'';}
+function estimate(){if(!service)return;const o=service.selectedOptions[0];let prices={};try{prices=JSON.parse(o?.dataset.prices||'{}');}catch{}const key=species?.value==='cat'?coat?.value:size?.value;const p=prices[key];$('#service-estimate').textContent=Number.isFinite(p)?new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:0}).format(p/100):'Quote on request';$('#service-duration').textContent=o?.dataset.duration||'';}
 function syncSpecies(){
  if(!service||!species||!size)return;
  savedServices[previousSpecies]=service.value;savedSizes[previousSpecies]=size.value;
  const pet=species.value;
+ if(coat){const cat=pet==='cat';[...coat.options].forEach(o=>{o.hidden=cat&&!['short','long'].includes(o.value);});if(cat&&!['short','long'].includes(coat.value))coat.value='short';$('#coat-help').textContent=cat?'Cat package pricing is based on short or long coat.':'Dog package pricing is based on size.';coat.closest('label').querySelector('span').textContent=cat?'Coat length *':'Coat type *';}
  const options=catalog.filter(o=>o.dataset.species===pet||o.dataset.species==='both').map(o=>o.cloneNode(true));
  const preferred=savedServices[pet];
  service.replaceChildren(...options);
@@ -40,10 +41,11 @@ function syncSpecies(){
  size.title=size.selectedOptions[0]?.textContent||'';
  previousSpecies=pet;estimate();
 }
-size?.addEventListener('change',()=>{size.title=size.selectedOptions[0]?.textContent||'';});
-species?.addEventListener('change',syncSpecies);service?.addEventListener('change',estimate);syncSpecies();
+size?.addEventListener('change',()=>{size.title=size.selectedOptions[0]?.textContent||'';estimate();});
+coat?.addEventListener('change',estimate);species?.addEventListener('change',syncSpecies);service?.addEventListener('change',estimate);syncSpecies();
 $$('input[name="mode"]').forEach(r=>r.addEventListener('change',()=>{const slots=r.value==='slot';$('[data-slot-panel]').hidden=!slots;$('[data-request-panel]').hidden=slots;$('input[name="preferred"]').required=!slots;$$('input[name="slot_id"]').forEach(x=>x.required=slots);}));
 if($('#booking-form')){track('booking_start');const p=$('input[name="preferred"]');if(p){const local=new Date(Date.now()+330*60000).toISOString().slice(0,16);p.min=local;}}
 $$('[data-confirm]').forEach(b=>b.addEventListener('click',e=>{if(!confirm(b.dataset.confirm))e.preventDefault();}));
 $$('[data-copy]').forEach(b=>b.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(b.dataset.copy);const t=$('#toast');t.textContent='UPI ID copied';t.classList.add('visible');setTimeout(()=>t.classList.remove('visible'),2500);}catch{$('#toast').textContent='Please copy the UPI ID shown above.';$('#toast').classList.add('visible');}}));
 })();
+
