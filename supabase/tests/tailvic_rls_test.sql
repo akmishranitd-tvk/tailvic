@@ -1,5 +1,5 @@
 begin;
-select plan(16);
+select plan(17);
 
 insert into auth.users (id, email, raw_user_meta_data)
 values
@@ -25,6 +25,42 @@ select lives_ok(
 select is((select count(*) from public.pets), 1::bigint, 'a customer sees their pet');
 select is((select count(*) from public.slots), 1::bigint, 'a customer sees only published future slots');
 select is((select count(*) from public.package_tariffs), 22::bigint, 'customers can read all approved tariff rows');
+select is(
+  (
+    select jsonb_agg(jsonb_build_array(package_slug, species, size_key, coat_key, amount_paise)
+                     order by package_slug, species, size_key, coat_key)
+    from public.package_tariffs
+  ),
+  (
+    select jsonb_agg(jsonb_build_array(package_slug, species, size_key, coat_key, amount_paise)
+                     order by package_slug, species, size_key, coat_key)
+    from (values
+      ('bath-brush','dog','small','',99900),
+      ('bath-brush','dog','medium','',119900),
+      ('bath-brush','dog','large','',149900),
+      ('bath-brush','dog','giant','',189900),
+      ('hygiene-groom','dog','small','',129900),
+      ('hygiene-groom','dog','medium','',159900),
+      ('hygiene-groom','dog','large','',199900),
+      ('hygiene-groom','dog','giant','',249900),
+      ('full-groom','dog','small','',179900),
+      ('full-groom','dog','medium','',219900),
+      ('full-groom','dog','large','',269900),
+      ('full-groom','dog','giant','',329900),
+      ('signature-coat-spa','dog','small','',229900),
+      ('signature-coat-spa','dog','medium','',269900),
+      ('signature-coat-spa','dog','large','',329900),
+      ('signature-coat-spa','dog','giant','',399900),
+      ('cat-coat-refresh','cat','','short',99900),
+      ('cat-coat-refresh','cat','','long',129900),
+      ('cat-hygiene-groom','cat','','short',139900),
+      ('cat-hygiene-groom','cat','','long',169900),
+      ('cat-full-coat-groom','cat','','short',189900),
+      ('cat-full-coat-groom','cat','','long',239900)
+    ) as approved(package_slug, species, size_key, coat_key, amount_paise)
+  ),
+  'the database tariff matches all approved customer prices'
+);
 
 select lives_ok(
   $$insert into public.bookings
